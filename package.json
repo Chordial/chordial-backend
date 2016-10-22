@@ -9,6 +9,8 @@
   "main": "app.js",
   "dependencies": {
     "express": "^4.12.3",
+    "node-spotify": "^0.8.1",
+    "spotify-web-api-node": "^2.3.6",
     "swagger-express-mw": "^0.1.0"
   },
   "devDependencies": {
