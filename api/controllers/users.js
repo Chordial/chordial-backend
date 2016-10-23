@@ -1,31 +1,12 @@
-'use strict';
-/*
- 'use strict' is not required but helpful for turning syntactical errors into true errors in the program flow
- https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Strict_mode
-*/
+var User = require('/models/user.js');
+var spotifyApi = new SpotifyWebApi({
+  clientId : 'c0be0c89a1e241898635418ad5fbbbef',
+  clientSecret : '5adebeaaee924c3cad12ed37545a8489',
+  redirectUri : 'http://localhost:8080/callback'
+});
 
-/*
- Modules make it possible to import JavaScript files into your application.  Modules are imported
- using 'require' statements that give you a reference to the module.
-
-  It is a good idea to list the modules that your application depends on in the package.json in the project root
- */
-var util = require('util');
-
-/*
- Once you 'require' a module you can reference the things that it exports.  These are defined in module.exports.
-
- For a controller in a127 (which this is) you should export the functions referenced in your Swagger document by name.
-
- Either:
-  - The HTTP Verb of the corresponding operation (get, put, post, delete, etc)
-  - Or the operationId associated with the operation in your Swagger document
-
-  In the starter/skeleton project the 'get' operation on the '/hello' path has an operationId named 'hello'.  Here,
-  we specify that in the exports of this module that 'hello' maps to the function named 'hello'
- */
 module.exports = {
-  authorize: authorize
+  authorizeUser : authorizeUser
 };
 
 /*
@@ -35,7 +16,60 @@ module.exports = {
   Param 2: a handle to the response object
  */
 
-function authorize(req, res) {
-  var spotifytoken = req.swagger.params.spotifytoken.value;
-  res.send(200)
+function authorizeUser(req, res) {
+  var spotifyCode = req.swagger.params.spotifyCode.value;
+  spotifyApi.authorizationCodeGrant(spotifyCode);
+  spotifyApi.getMe()
+  .then(function(data) {
+    var name = data.body.display_name;
+    var id = data.body.id;
+  }, function(err) {
+    console.log('Something went wrong!', err);
+  });
+  User.find({spotifyID:id}, function(err, sUser) {
+      if (err)
+          res.send(err);
+      if (sUser === null){
+          var user = new User();
+          user.spotifyID = id;
+          user.name = name;
+          user.friends = [];
+          user.save(function(err) {
+              if (err)
+                  res.send(err);
+
+              res.send('New Chordial User Created?!');
+          });
+          res.send(user.id);
+        }
+      else {
+        res.send(sUser.id);
+      }
+  });
+  res.send(200);
+}
+
+function detailMe(req,res){
+  spotifyApi.getMe()
+  .then(function(data) {
+    console.log('Some information about the authenticated user', data.body);
+  }, function(err) {
+    console.log('Something went wrong!', err);
+  });
+}
+
+function detailFriends(req,res){
+
+}
+
+function addFriend(req,res){
+
+}
+
+function myMusic(req,res){
+
+}
+
+function shareCommon(req,res){
+
 }
