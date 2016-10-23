@@ -35,7 +35,7 @@ paths:
         200:
           description: good authorization
           schema:
-            $ref: '#/definitions/GetUserInfo'
+            $ref: '#/definitions/User'
         400:
           description: bad userID
 
@@ -51,7 +51,7 @@ paths:
         200:
           description: user is logged in
           schema:
-            $ref: '#/definitions/Friends'
+            $ref: '#/definitions/Users'
 
     post:
       summary: add friend
@@ -144,7 +144,7 @@ paths:
 # complex objects have schema definitions
 
 definitions:
-  Friends:
+  Users:
     type: object
     required:
       - chordIDs
@@ -153,24 +153,26 @@ definitions:
         type: array
         items:
           type: string
-          description: Chordial user ID's of friends
-
-  GetUserInfo:
+          description: List of Chordial User's IDs
+  User:
     type: object
     required:
-      - display_name
-      - idS
-      - idC
+     - name
+     - spotifyID
+     - chordialID
+     - friends
     properties:
-      display_name:
+      name:
         type: string
-        description: the user's Chordial display name
-      idS:
+      spotifyID:
         type: string
-        description: Spotify user ID
-      idC:
+      chordialID:
         type: string
-        description: Chordial user ID
+      friends:
+        type: array
+        items:
+          type: string
+          description: List of Chordial User's IDs
 
   Tracks:
     type: object
@@ -180,3 +182,11 @@ definitions:
         items:
           type: string
           description: I don't know how tracks actually work
+  
+  Track:
+    type: object
+    properties:
+      url:
+        type: string
+      track_name:
+        type: string
