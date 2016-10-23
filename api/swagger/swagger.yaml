@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
   version: "0.0.1"
-  title: Hello World App
+  title: Chordial
 # during dev, should point to your local machine
 host: localhost:10010
 # basePath prefixes all resource paths
@@ -18,60 +18,165 @@ consumes:
 produces:
   - application/json
 paths:
-  /hello:
-    # binds a127 app logic to a route
-    x-swagger-router-controller: hello_world
+
+  /me:
+    x-swagger-router-controller: users
     get:
-      description: Returns 'Hello' to the caller
-      # used as the method name of the controller
-      operationId: hello
+      summary: user properties
+      operationId: detailUser
+      description: Sends user authentication token to spotify and gets user information
       parameters:
-        - name: name
-          in: query
-          description: The name of the person to whom to say hello
-          required: false
+      - name: idC
+        in: body
+        required: false
+        schema:
           type: string
       responses:
-        "200":
-          description: Success
+        200:
+          description: good authorization
           schema:
-            # a pointer to a definition
-            $ref: "#/definitions/HelloWorldResponse"
-        # responses may fall through to errors
-        default:
-          description: Error
+            $ref: '#/definitions/GetUserInfo'
+        400:
+          description: bad userID
+
+
+  /me/friends:
+    x-swagger-router-controller: users
+
+    get:
+      summary: list of friends
+      operationId: detailFriends
+      description: gets the list of friends and their Chordial information from database
+      responses:
+        200:
+          description: user is logged in
           schema:
-            $ref: "#/definitions/ErrorResponse"
-  /authorize:
+            $ref: '#/definitions/Friends'
+
+    post:
+      summary: add friend
+      operationId: addFriend
+      description: get some friends
+      parameters:
+      - name: friendName
+        in: body
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: friend successfully added
+          schema:
+            type: string
+        400:
+          description: nobody likes you
+          schema:
+            type: string
+
+  /me/music:
+    x-swagger-router-controller: users
+
+    get:
+      summary: In-progress(lazy) placeholder for get tracks/playlists/etc.
+      operationId: myMusic
+      description: residentSleeper
+      parameters:
+      - name: idC
+        in: body
+        required: false
+        schema:
+          type: string
+      responses:
+        200:
+          description: I'm beyond sure this is ten times more work than actual coding
+          schema:
+            $ref: '#/definitions/Tracks'
+
+  /me/share/{idC}:
+    x-swagger-router-controller: users
+
+    get:
+      summary: I'm going to get to coding
+      operationId: shareCommon
+      description: agjdakwentjwnt
+      parameters:
+      - name: idC
+        in: path
+        required: true
+        type: string
+      responses:
+        200:
+          description: MANY A TRACK
+          schema:
+            $ref: '#/definitions/Tracks'
+
+
+
+
+  /user/authorize:
     x-swagger-router-controller: users
     post:
       summary: authorizes user
       operationId: authorizeUser
       description: Gets authorization token from Spotify and sends it to the backend
       parameters:
-      - in: body
-        name: spotifytoken
+      - name: spotifyCode
+        in: body
         required: true
         schema:
           type: string
       responses:
         200:
-          description: the user has been sucessfully authenticated
+          description: authentication successful, send user id to frontend
+          schema:
+            type: string
         400:
           description: the user failed to be authenticated
+
+
   /swagger:
     x-swagger-pipe: swagger_raw
+
+
+
+
+
 # complex objects have schema definitions
+
 definitions:
-  HelloWorldResponse:
+  Friends:
+    type: object
     required:
-      - message
+      - chordIDs
     properties:
-      message:
-        type: string
-  ErrorResponse:
+      chordIDs:
+        type: array
+        items:
+          type: string
+          description: Chordial user ID's of friends
+
+  GetUserInfo:
+    type: object
     required:
-      - message
+      - display_name
+      - idS
+      - idC
     properties:
-      message:
+      display_name:
         type: string
+        description: the user's Chordial display name
+      idS:
+        type: string
+        description: Spotify user ID
+      idC:
+        type: string
+        description: Chordial user ID
+
+  Tracks:
+    type: object
+    properties:
+      urls:
+        type: array
+        items:
+          type: string
+          description: I don't know how tracks actually work
