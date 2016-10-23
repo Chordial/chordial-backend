@@ -23,7 +23,7 @@ paths:
     x-swagger-router-controller: users
     get:
       summary: user properties
-      operationId: detailUser
+      operationId: detailMe
       description: Sends user authentication token to spotify and gets user information
       parameters:
       - name: idC
