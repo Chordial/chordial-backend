@@ -28,57 +28,50 @@ module.exports = {authorizeUser, authorizeTesting, detailMe, detailFriends, addF
  }
 
 function authorizeUser(req, res) {
-  var id , name;
-  console.log('ive been called');
+  var id , name, chordialID;
   var code = req.swagger.params.code.value;
   var p1 = new Promise(function(resolve,reject){
-  spotifyApi.authorizationCodeGrant(code)
-  .then(function(data){
-    spotifyApi.setAccessToken(data.body.access_token);
-    console.log('I"VE REALLY SET IT CMON');
-    spotifyApi.setRefreshToken(data.body.refresh_token);
-    resolve();
-});
-});
-p1.then(function(){
-  console.log('access token set');
-  spotifyApi.getMe()
-  .then(function(data) {
-    console.log('me gotten');
-    name = data.body.display_name;
-    id = data.body.id;
-    console.log("1st id" + id);
-    User.find({spotifyID:id}, function(err, sUser) {
+    spotifyApi.authorizationCodeGrant(code)
+    .then(function(data){
+      spotifyApi.setAccessToken(data.body.access_token);
+      spotifyApi.setRefreshToken(data.body.refresh_token);
+      resolve();
+    });
+  });
+  p1.then(function(){
+    spotifyApi.getMe()
+    .then(function(data) {
+      if (data.body.display_name === null)
+        name = data.body.id;
+        else
+        name = data.body.display_name;
+      id = data.body.id;
+      User.find({spotifyID:id}, function(err, sUser) {
         if (err)
             res.send(err);
-        res.json(sUser);
-        if (sUser == null){
+        if (!Object.keys(sUser).length){
             console.log('making new user');
             var user = new User();
             user.spotifyID = id;
             console.log("id" + id);
             user.name = name;
+            user.chordialID = user.id;
             user.save(function(err) {
-                if (err)
-                    res.send(err);
-                console.log('New Chordial User Created?!');
+              if (err)
+                res.send(err);
+              console.log('New Chordial User Created?!');
             });
-            console.log('maybe');
-            console.log(user.id);
-            res.json(user.id);
           }
-        else {
-          console.log('else');
-          console.log(sUser);
-          res.json(sUser);
-        }
-    });
-    console.log('things happened');
-    res.json({ message:'400'});
-  }, function(err) {
-    console.log('Something went wrong!', err);
+          else {
+            console.log(sUser);
+          }
+        }).then(function(){
+          res.json({ message:'200'});
+        });
+      }, function(err) {
+        console.log('Something went wrong!', err);
+      });
   });
-});
 }
 
 function detailMe(req,res){
@@ -107,10 +100,9 @@ function shareCommon(req,res){
 }
 
 function getAll(req,res){
-  User.find(function(err, users) {
+  User.find().select('-_id').select('-__v').exec(function(err, users) {
       if (err)
           res.send(err);
-
       res.json(users);
   });
 }

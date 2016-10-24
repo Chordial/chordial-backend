@@ -201,17 +201,13 @@ definitions:
   User:
     type: object
     required:
-      - _id
-      - __v
+      - spotifyID
+      - chordialID
     properties:
-      name:
-        type: string
       spotifyID:
         type: string
-      _id:
+      chordialID:
         type: string
-      __v:
-        type: number
       friends:
         type: array
         items:
