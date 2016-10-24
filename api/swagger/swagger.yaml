@@ -109,6 +109,20 @@ paths:
           description: MANY A TRACK
           schema:
             $ref: '#/definitions/Tracks'
+            
+            
+  /user/authorizeTesting:
+    x-swagger-router-controller: users
+  
+    get:
+      summary: woo
+      operationId: authourize
+      description: akldjfkwe
+      responses:
+        300:
+          description: Goes to spotify authorization
+          schema:
+            type: string
 
 
 
@@ -120,11 +134,10 @@ paths:
       operationId: authorizeUser
       description: Gets authorization token from Spotify and sends it to the backend
       parameters:
-      - name: spotifyCode
-        in: body
+      - name: code
+        in: query
         required: true
-        schema:
-          type: string
+        type: string
       responses:
         200:
           description: authentication successful, send user id to frontend

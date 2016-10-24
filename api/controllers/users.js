@@ -2,7 +2,7 @@ var User = require('/models/user.js');
 var spotifyApi = new SpotifyWebApi({
   clientId : 'c0be0c89a1e241898635418ad5fbbbef',
   clientSecret : '5adebeaaee924c3cad12ed37545a8489',
-  redirectUri : 'http://localhost:8080/callback'
+  redirectUri : 'http://localhost:10010/user/authorize'
 });
 
 module.exports = {
@@ -15,6 +15,16 @@ module.exports = {
   Param 1: a handle to the request object
   Param 2: a handle to the response object
  */
+ function authorizeTesting(req,res) {
+   var scopes = ['user-follow-read'],
+       redirectUri = 'http://localhost:10010/user/authorize',
+       clientId = 'c0be0c89a1e241898635418ad5fbbbef';
+   var url = 'https://accounts.spotify.com/authorize?client_id=' + clientId +
+       '&response_type=token' +
+       '&scope=' + encodeURIComponent(scopes) +
+       '&redirect_uri=' + encodeURIComponent(redirectUri);
+       res.writeHead(301,{Location: url});
+ }
 
 function authorizeUser(req, res) {
   var spotifyCode = req.swagger.params.spotifyCode.value;
