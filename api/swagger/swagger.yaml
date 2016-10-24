@@ -51,7 +51,9 @@ paths:
         200:
           description: user is logged in
           schema:
-            $ref: '#/definitions/Users'
+            type: array
+            items:
+              $ref: '#/definitions/User'
 
     post:
       summary: add friend
@@ -96,9 +98,9 @@ paths:
     x-swagger-router-controller: users
 
     get:
-      summary: I'm going to get to coding
+      summary: gets common songs between current user and other user
       operationId: shareCommon
-      description: agjdakwentjwnt
+      description: compares track arrays of each user and uses matching ids to return all common tracks
       parameters:
       - name: idC
         in: path
@@ -108,7 +110,9 @@ paths:
         200:
           description: MANY A TRACK
           schema:
-            $ref: '#/definitions/Tracks'
+            type: array
+            items:
+              $ref: '#/definitions/Track'
 
 
   /user:
@@ -226,7 +230,7 @@ definitions:
   Track:
     type: object
     properties:
-      url:
+      trackName:
         type: string
-      track_name:
+      trackID:
         type: string
