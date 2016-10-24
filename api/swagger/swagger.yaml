@@ -109,27 +109,28 @@ paths:
           description: MANY A TRACK
           schema:
             $ref: '#/definitions/Tracks'
-            
-            
+
+
   /user/authorizeTesting:
     x-swagger-router-controller: users
-  
+
     get:
       summary: woo
-      operationId: authourize
+      operationId: authorizeTesting
       description: akldjfkwe
       responses:
-        300:
-          description: Goes to spotify authorization
+        302:
+          description: 302 response
           schema:
             type: string
 
 
 
 
-  /user/authorize:
+
+  /user/callback:
     x-swagger-router-controller: users
-    post:
+    get:
       summary: authorizes user
       operationId: authorizeUser
       description: Gets authorization token from Spotify and sends it to the backend
@@ -145,6 +146,20 @@ paths:
             type: string
         400:
           description: the user failed to be authenticated
+
+
+  /watchoutDELETEALL:
+    x-swagger-router-controller: users
+    delete:
+      summary: RIP your database
+      operationId: deleteThemAll
+      description: R I P
+      responses:
+        200:
+          description: deletion done
+          schema:
+            type: string
+
 
 
   /swagger:
@@ -195,7 +210,7 @@ definitions:
         items:
           type: string
           description: I don't know how tracks actually work
-  
+
   Track:
     type: object
     properties:
