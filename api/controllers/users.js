@@ -1,13 +1,12 @@
-var User = require('/models/user.js');
+var SpotifyWebApi = require('spotify-web-api-node');
+var User = require('../models/user.js');
 var spotifyApi = new SpotifyWebApi({
   clientId : 'c0be0c89a1e241898635418ad5fbbbef',
   clientSecret : '5adebeaaee924c3cad12ed37545a8489',
   redirectUri : 'http://localhost:10010/user/authorize'
 });
 
-module.exports = {
-  authorizeUser : authorizeUser
-};
+module.exports = {authorizeUser, authorizeTesting, detailMe, detailFriends, addFriend, myMusic, shareCommon};
 
 /*
   Functions in a127 controllers used for operations should take two parameters:
