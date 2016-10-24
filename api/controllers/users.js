@@ -7,7 +7,7 @@ var spotifyApi = new SpotifyWebApi({
   redirectUri : 'http://localhost:10010/user/callback'
 });
 
-module.exports = {authorizeUser, authorizeTesting, detailMe, detailFriends, addFriend, myMusic, shareCommon, deleteThemAll};
+module.exports = {authorizeUser, authorizeTesting, detailMe, detailFriends, addFriend, myMusic, shareCommon, getAll, deleteThemAll};
 
 /*
   Functions in a127 controllers used for operations should take two parameters:
@@ -51,6 +51,7 @@ p1.then(function(){
     User.find({spotifyID:id}, function(err, sUser) {
         if (err)
             res.send(err);
+        res.json(sUser);
         if (sUser == null){
             console.log('making new user');
             var user = new User();
@@ -61,7 +62,6 @@ p1.then(function(){
                 if (err)
                     res.send(err);
                 console.log('New Chordial User Created?!');
-                res.json({ message:'New Chordial User Created?!'});
             });
             console.log('maybe');
             console.log(user.id);
@@ -104,6 +104,15 @@ function myMusic(req,res){
 
 function shareCommon(req,res){
 
+}
+
+function getAll(req,res){
+  User.find(function(err, users) {
+      if (err)
+          res.send(err);
+
+      res.json(users);
+  });
 }
 
 function deleteThemAll(req,res){

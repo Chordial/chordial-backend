@@ -111,6 +111,22 @@ paths:
             $ref: '#/definitions/Tracks'
 
 
+  /user:
+    x-swagger-router-controller: users
+
+    get:
+      summary: gets all users
+      operationId: getAll
+      responses:
+        200:
+          description: returns users.find everything
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+
+
+
   /user/authorizeTesting:
     x-swagger-router-controller: users
 
@@ -185,17 +201,17 @@ definitions:
   User:
     type: object
     required:
-     - name
-     - spotifyID
-     - chordialID
-     - friends
+      - _id
+      - __v
     properties:
       name:
         type: string
       spotifyID:
         type: string
-      chordialID:
+      _id:
         type: string
+      __v:
+        type: number
       friends:
         type: array
         items:
