@@ -1,7 +1,8 @@
 
-
-var SwaggerExpress = require('swagger-express-mw');
 var app = require('express')();
+var SwaggerExpress = require('swagger-express-mw');
+var mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost/chordial196');
 module.exports = app; // for testing
 
 var config = {
@@ -16,5 +17,5 @@ SwaggerExpress.create(config, function(err, swaggerExpress) {
 
   var port = process.env.PORT || 10010;
   app.listen(port);
-
+  console.log('Magic happens on port ' + port);
 });

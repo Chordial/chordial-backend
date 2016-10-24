@@ -111,20 +111,50 @@ paths:
             $ref: '#/definitions/Tracks'
 
 
-
-
-  /user/authorize:
+  /user:
     x-swagger-router-controller: users
-    post:
+
+    get:
+      summary: gets all users
+      operationId: getAll
+      responses:
+        200:
+          description: returns users.find everything
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+
+
+
+  /user/authorizeTesting:
+    x-swagger-router-controller: users
+
+    get:
+      summary: woo
+      operationId: authorizeTesting
+      description: akldjfkwe
+      responses:
+        302:
+          description: 302 response
+          schema:
+            type: string
+
+
+
+
+
+  /user/callback:
+    x-swagger-router-controller: users
+    get:
       summary: authorizes user
       operationId: authorizeUser
       description: Gets authorization token from Spotify and sends it to the backend
       parameters:
-      - name: spotifyCode
-        in: body
+      - name: code
+        in: query
         required: true
-        schema:
-          type: string
+        type: string
       responses:
         200:
           description: authentication successful, send user id to frontend
@@ -132,6 +162,20 @@ paths:
             type: string
         400:
           description: the user failed to be authenticated
+
+
+  /watchoutDELETEALL:
+    x-swagger-router-controller: users
+    delete:
+      summary: RIP your database
+      operationId: deleteThemAll
+      description: R I P
+      responses:
+        200:
+          description: deletion done
+          schema:
+            type: string
+
 
 
   /swagger:
@@ -157,13 +201,9 @@ definitions:
   User:
     type: object
     required:
-     - name
-     - spotifyID
-     - chordialID
-     - friends
+      - spotifyID
+      - chordialID
     properties:
-      name:
-        type: string
       spotifyID:
         type: string
       chordialID:
@@ -182,7 +222,7 @@ definitions:
         items:
           type: string
           description: I don't know how tracks actually work
-  
+
   Track:
     type: object
     properties:
