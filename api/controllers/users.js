@@ -7,14 +7,8 @@ var spotifyApi = new SpotifyWebApi({
   redirectUri : 'http://localhost:10010/user/callback'
 });
 
-module.exports = {authorizeUser, authorizeTesting, detailMe, detailFriends, addFriend, myMusic, shareCommon, getAll, deleteThemAll};
+module.exports = {authorizeUser, authorizeTesting, detailMe, detailFriends, addFriend, myMusic, shareCommon, getAll, deleteThemAll}; // jshint ignore:line
 
-/*
-  Functions in a127 controllers used for operations should take two parameters:
-
-  Param 1: a handle to the request object
-  Param 2: a handle to the response object
- */
  function authorizeTesting(req,res) {
    var scopes = ['user-follow-read'],
        redirectUri = 'http://localhost:10010/user/authorize',
@@ -29,50 +23,50 @@ module.exports = {authorizeUser, authorizeTesting, detailMe, detailFriends, addF
 
 function authorizeUser(req, res) {
   var id , name, chordialID;
-  var code = req.swagger.params.code.value;
-  var p1 = new Promise(function(resolve,reject){
-    spotifyApi.authorizationCodeGrant(code)
+  var code = req.swagger.params.code.value; //spotify code
+  var p1 = new Promise(function(resolve,reject){  //does not handle reject
+    spotifyApi.authorizationCodeGrant(code)   //trades code
     .then(function(data){
-      spotifyApi.setAccessToken(data.body.access_token);
+      spotifyApi.setAccessToken(data.body.access_token);  //gets access
       spotifyApi.setRefreshToken(data.body.refresh_token);
-      resolve();
+      resolve();    //resolves promise
     });
-  });
+  });           //End of authorization promise
   p1.then(function(){
-    spotifyApi.getMe()
+    spotifyApi.getMe()    //Gets information about authorized user
     .then(function(data) {
-      if (data.body.display_name === null)
-        name = data.body.id;
-        else
-        name = data.body.display_name;
+      if (data.body.display_name === null)  //Spotify user no display name
+        name = data.body.id;    //So chordial username is id
+      else
+        name = data.body.display_name; //Facebook user display name
       id = data.body.id;
       User.find({spotifyID:id}, function(err, sUser) {
         if (err)
             res.send(err);
-        if (!Object.keys(sUser).length){
+        if (!Object.keys(sUser).length){    //User not in database
             console.log('making new user');
-            var user = new User();
-            user.spotifyID = id;
-            console.log("id" + id);
-            user.name = name;
-            user.chordialID = user.id;
-            user.save(function(err) {
+            var user = new User();        //
+            user.spotifyID = id;          //
+            console.log("id" + id);       //  These lines set up new user
+            user.name = name;             //
+            user.chordialID = user.id;    //
+            user.save(function(err) {     //
               if (err)
                 res.send(err);
               console.log('New Chordial User Created?!');
-            });
-          }
+            });       // end of user save function
+          }   //end of creating new user
           else {
-            console.log(sUser);
+            console.log(sUser);   //displays existing user
           }
-        }).then(function(){
-          res.json({ message:'200'});
-        });
+        }).then(function(){     //End of User.find -> then respond to server
+          res.json({ message:'200'});   //Send 200 or user ID
+        });           // End of User.find.then
       }, function(err) {
         console.log('Something went wrong!', err);
-      });
-  });
-}
+      });   //End of getMe .then
+  });   //End of promise p1 .then
+} //End of authorization
 
 function detailMe(req,res){
   spotifyApi.getMe()
@@ -111,7 +105,6 @@ function deleteThemAll(req,res){
   User.remove({} , function(err, user) {
     if (err)
       res.send(err);
-
     res.json({ message: 'Database Successfully cleared'});
   });
 }
