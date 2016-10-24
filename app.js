@@ -2,7 +2,7 @@
 var app = require('express')();
 var SwaggerExpress = require('swagger-express-mw');
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://nodebears:pandapolargrizzly3@ds033337.mongolab.com:33337/woonode');
+mongoose.connect('mongodb://localhost/chordial196');
 module.exports = app; // for testing
 
 var config = {
