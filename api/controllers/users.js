@@ -31,26 +31,27 @@ function authorizeUser(req, res) {
   var id , name;
   console.log('ive been called');
   var code = req.swagger.params.code.value;
-  //var p1 = new Promise(function(resolve,reject){
+  var p1 = new Promise(function(resolve,reject){
   spotifyApi.authorizationCodeGrant(code)
   .then(function(data){
     spotifyApi.setAccessToken(data.body.access_token);
     console.log('I"VE REALLY SET IT CMON');
     spotifyApi.setRefreshToken(data.body.refresh_token);
-  //  resolve();
-  });
-//});
-/*p1.then(function(){
+    resolve();
+});
+});
+p1.then(function(){
   console.log('access token set');
   spotifyApi.getMe()
   .then(function(data) {
     console.log('me gotten');
     name = data.body.display_name;
     id = data.body.id;
+    console.log("1st id" + id);
     User.find({spotifyID:id}, function(err, sUser) {
         if (err)
             res.send(err);
-        if (sUser === null){
+        if (sUser == null){
             console.log('making new user');
             var user = new User();
             user.spotifyID = id;
@@ -77,7 +78,7 @@ function authorizeUser(req, res) {
   }, function(err) {
     console.log('Something went wrong!', err);
   });
-});*/
+});
 }
 
 function detailMe(req,res){
