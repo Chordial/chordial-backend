@@ -9,6 +9,11 @@ var spotifyApi = new SpotifyWebApi({
 
 module.exports = {authorizeUser, authorizeTesting, detailMe, detailFriends, addFriend, myMusic, shareCommon, getAll, deleteThemAll}; // jshint ignore:line
 
+var authPromise = function(resolve,reject){
+  spotifyApi.setAccessToken(data.header.accessToken); //LUL just realized this doesn't actually do anything
+  resolve();
+};
+
  function authorizeTesting(req,res) {
    var scopes = ['user-follow-read'],
        redirectUri = 'http://localhost:10010/user/authorize',
@@ -28,6 +33,7 @@ function authorizeUser(req, res) {
     spotifyApi.authorizationCodeGrant(code)   //trades code
     .then(function(data){
       spotifyApi.setAccessToken(data.body.access_token);  //gets access
+      res.json(data.body.access_token);
       spotifyApi.setRefreshToken(data.body.refresh_token);
       resolve();    //resolves promise
     });
@@ -60,9 +66,19 @@ function authorizeUser(req, res) {
             console.log(user);   //displays existing user
           }
         }).then(function(){     //End of User.find -> sync top tracks and respond to server
-          spotifyApi.getMyTopTracks(limit=50)
-          .then(function(track) {
-            user.tracks.append(track.body.id); //Populates user tracks with id of top tracks
+          User.findOne({spotifyID:id}, function(err,user) {
+            user.tracks = [];
+            spotifyApi.getMyTopTracks({limit:50})
+            .then(function(toptracks) {
+              toptracks.body.items.forEach(function(track){
+                user.tracks.push(track.name);
+              });//Populates user tracks with id of top tracks
+              user.save(function(err){
+                console.log(err);
+              });
+            },function(err) {
+              console.log('Something went wrong!', err);
+            });
           });
           res.json({ message:'200'});   //Send 200 or user ID
         });           // End of User.find.then
