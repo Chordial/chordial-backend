@@ -40,12 +40,12 @@ function authorizeUser(req, res) {
       else
         name = data.body.display_name; //Facebook user display name
       id = data.body.id;
-      User.find({spotifyID:id}, function(err, sUser) {
+      User.findOne({spotifyID:id}, function(err, user) {
         if (err)
             res.send(err);
-        if (!Object.keys(sUser).length){    //User not in database
+        if (user === null){    //User not in database
             console.log('making new user');
-            var user = new User();        //
+            user = new User();        //
             user.spotifyID = id;          //
             console.log("id" + id);       //  These lines set up new user
             user.name = name;             //
@@ -57,13 +57,17 @@ function authorizeUser(req, res) {
             });       // end of user save function
           }   //end of creating new user
           else {
-            console.log(sUser);   //displays existing user
+            console.log(user);   //displays existing user
           }
-        }).then(function(){     //End of User.find -> then respond to server
+        }).then(function(){     //End of User.find -> sync top tracks and respond to server
+          spotifyApi.getMyTopTracks(limit=50)
+          .then(function(track) {
+            user.tracks.append(track.body.id); //Populates user tracks with id of top tracks
+          });
           res.json({ message:'200'});   //Send 200 or user ID
         });           // End of User.find.then
       }, function(err) {
-        console.log('Something went wrong!', err);
+        console.log('Something went wrong!', err); //Error of getMe .then
       });   //End of getMe .then
   });   //End of promise p1 .then
 } //End of authorization
@@ -82,6 +86,31 @@ function detailFriends(req,res){
 }
 
 function addFriend(req,res){
+  var id;
+  spotifyApi.getMe()
+  .then(function (data) {
+    id = data.body.id;
+    User.findOne({spotifyID : id})
+    .exec(function(err, user) {
+      User.findOne({name : req.swagger.params.friendName.value}, function(err, userF) {
+        if(err)
+          res.send(err);
+        if(userF === null)
+          res.json({ message: "Sorry, that user does not exist"});
+        else {
+        user.friends.push(userF.name);
+        user.save(function(err) {
+          if(err)
+            res.send(err);
+          console.log("New friend " + req.swagger.params.friendName.value + " added");
+          res.json({ message:'200'});
+        });
+      }
+    });
+    });
+  }, function(err) {
+    console.log('Something went wrong!', err);
+  });
 
 }
 

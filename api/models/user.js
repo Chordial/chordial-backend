@@ -6,8 +6,8 @@ var UserSchema = new Schema({
   name : String,
   spotifyID : String,
   chordialID : String,
-  friends : [{type : String}],
-  tracks : [{type : String}]
+  friends : [String],
+  tracks : [String]
 });
 
 var TrackSchema = new Schema({
