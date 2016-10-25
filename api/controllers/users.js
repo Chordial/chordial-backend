@@ -38,7 +38,7 @@ module.exports = {
  }
 
 function authorizeUser(req, res) {
-  var id , name, chordialID;
+  var id , name, chordialID, tracks;
   var code = req.swagger.params.code.value;
   var p1 = new Promise(function(resolve,reject){
     spotifyApi.authorizationCodeGrant(code)
@@ -102,15 +102,27 @@ function addFriend(req,res){
 }
 
 function myMusic(req,res){
-  spotifyApi.setAccessToken(req.swagger.params.userAccessToken.value);
-  spotifyApi.getMyTopTracks()
-  .then(function(data) {
-    User.tracks = data.body.name;
-    console.log('Top Tracks added to user');
-    console.log(data.body.name);
+  var id;
+  spotifyApi.getMe()
+  .then(function(data){
+    id = data.body.id;
+    User.findOne({spotifyID : id})
+    .exec(function (err, user){
+      User.tracks = [];
+      spotifyApi.getMyTopTracks({limit:50})
+      .then(function(data) {
+        for(var i = 0; i < data.body.total; i++){
+          User.tracks.push(data.body.items[i]);
+        }
+        User.save(function(err){
+          console.log(err);
+        });
+      });
+    });
   }, function(err) {
     console.log('Something went wrong!', err);
   });
+    
 
 }
 

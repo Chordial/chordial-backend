@@ -81,9 +81,9 @@ paths:
       operationId: myMusic
       description: residentSleeper
       parameters:
-      - name: friendName
+      - name: idC
         in: body
-        required: true
+        required: false
         schema:
           type: string
       responses:
