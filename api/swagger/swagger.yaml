@@ -26,11 +26,10 @@ paths:
       operationId: detailMe
       description: Sends user authentication token to spotify and gets user information
       parameters:
-      - name: idC
-        in: body
+      - name: accessToken
+        in: header
         required: false
-        schema:
-          type: string
+        type: string
       responses:
         200:
           description: good authorization
@@ -47,6 +46,11 @@ paths:
       summary: list of friends
       operationId: detailFriends
       description: gets the list of friends and their Chordial information from database
+      parameters:
+      - name: accessToken
+        in: header
+        required: false
+        type: string
       responses:
         200:
           description: user is logged in
@@ -65,6 +69,10 @@ paths:
         required: true
         schema:
           type: string
+      - name: accessToken
+        in: header
+        required: false
+        type: string
       responses:
         200:
           description: friend successfully added
@@ -83,11 +91,10 @@ paths:
       operationId: myMusic
       description: residentSleeper
       parameters:
-      - name: idC
-        in: body
+      - name: accessToken
+        in: header
         required: false
-        schema:
-          type: string
+        type: string
       responses:
         200:
           description: I'm beyond sure this is ten times more work than actual coding
@@ -105,6 +112,10 @@ paths:
       - name: idC
         in: path
         required: true
+        type: string
+      - name: accessToken
+        in: header
+        required: false
         type: string
       responses:
         200:
