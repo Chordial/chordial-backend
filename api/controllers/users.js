@@ -147,11 +147,15 @@ function myMusic(req,res){
 }
 
 function shareCommon(req,res){
-  var common = [];
-  spotifyApi.setAccessToken(req.swagger.params.accessToken);
+  var common = [],name;
+  //spotifyApi.setAccessToken(req.swagger.params.accessToken);
   spotifyApi.getMe()
-  .then(function(err,data) {
-    User.findOne({spotifyID : data.body.id})
+  .then(function(data) {
+    if (data.body.display_name === null)  //Spotify user no display name
+      name = data.body.id;    //So chordial username is id
+    else
+      name = data.body.display_name; //Facebook user display name
+    User.findOne({spotifyID : data.body.name})
     .exec(function(err, user) {
       User.findOne({spotifyID : req.swagger.params.idC}, function(err, userF) {
         if(err)
