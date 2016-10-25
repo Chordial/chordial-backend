@@ -123,7 +123,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/Track'
+              type: string
 
 
   /user:
@@ -156,8 +156,27 @@ paths:
             location:
               type: string
 
+  /user/tracks/{trackName}:
+    x-swagger-router-controller: users
 
-
+    post:
+      summary: adds a track to user tracks
+      operationId: addTrack
+      description: adds a track
+      parameters:
+      - name: trackName
+        in: path
+        type: string
+        required: true
+      - name: userName
+        in: body
+        schema:
+          type: string
+      responses:
+        200:
+          description: track successfully added
+          schema:
+            type: string
 
 
   /user/callback:
