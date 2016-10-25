@@ -152,8 +152,9 @@ paths:
       responses:
         302:
           description: 302 response
-          schema:
-            type: string
+          headers:
+            location:
+              type: string
 
 
 
