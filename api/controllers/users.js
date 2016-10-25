@@ -8,7 +8,7 @@ var spotifyApi = new SpotifyWebApi({
   redirectUri : 'http://localhost:10010/user/callback'
 });
 
-module.exports = {authorizeUser, authorizeTesting, detailMe, detailFriends, addFriend, myMusic, shareCommon, getAll, deleteThemAll}; // jshint ignore:line
+module.exports = {authorizeUser, authorizeTesting, detailMe, detailFriends, addFriend, myMusic, shareCommon, getAll, deleteThemAll, addTrack}; // jshint ignore:line
 
 
  function authorizeTesting(req,res) {
@@ -147,27 +147,44 @@ function myMusic(req,res){
 }
 
 function shareCommon(req,res){
-  var common = [],name;
+  var common = [],id;
   //spotifyApi.setAccessToken(req.swagger.params.accessToken);
   spotifyApi.getMe()
   .then(function(data) {
-    if (data.body.display_name === null)  //Spotify user no display name
-      name = data.body.id;    //So chordial username is id
-    else
-      name = data.body.display_name; //Facebook user display name
-    User.findOne({spotifyID : data.body.name})
+    id = data.body.id;
+    User.findOne({spotifyID : id})
     .exec(function(err, user) {
-      User.findOne({spotifyID : req.swagger.params.idC}, function(err, userF) {
+      User.findOne({spotifyID : req.swagger.params.idC.value}, function(err, userF) {
         if(err)
           res.send(err);
         for (var i = 0 ; i < user.tracks.length; i++)
-          for (var j = 0; j < userF.tracks.length; j++)
-            if(user.tracks[i].equals(userF.tracks[j]))
-              common.push(user.tracks[i]);
+          for (var j = 0; j < userF.tracks.length; j++){
+            console.log(user.tracks[i]);
+            console.log(user.tracks[j]);
+            if((user.tracks[i].toString())===(userF.tracks[j].toString()))
+              common.push(user.tracks[i].toString());}
       })
-      .then(res.json(common));
+      .then(function(){
+        console.log(common);
+        res.json(common);
+      });
     });
   });
+}
+
+function addTrack(req,res){
+  User.findOne({spotifyID:req.swagger.params.userName.value})
+  .exec(function(err,user) {
+    if(err)
+      res.send(err);
+    user.tracks.push(req.swagger.params.trackName.value);
+    user.save(function(err2) {     //
+      if (err2)
+        res.send(err2);
+      console.log('New track '+ req.swagger.params.trackName + ' added to user ' + req.swagger.params.userName.value);
+    });       // end of user save function
+  });
+  res.json({message:'200'});
 }
 
 function getAll(req,res){
