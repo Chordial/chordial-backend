@@ -1,6 +1,7 @@
 var Promise = require('promise');
 var SpotifyWebApi = require('spotify-web-api-node');
 var User = require('../models/user.js');
+require('../helpers/helpusers.js')();
 var spotifyApi = new SpotifyWebApi({
   clientId : 'c0be0c89a1e241898635418ad5fbbbef',
   clientSecret : '5adebeaaee924c3cad12ed37545a8489',
@@ -9,10 +10,6 @@ var spotifyApi = new SpotifyWebApi({
 
 module.exports = {authorizeUser, authorizeTesting, detailMe, detailFriends, addFriend, myMusic, shareCommon, getAll, deleteThemAll}; // jshint ignore:line
 
-var authPromise = function(resolve,reject){
-  spotifyApi.setAccessToken(data.header.accessToken); //LUL just realized this doesn't actually do anything
-  resolve();
-};
 
  function authorizeTesting(req,res) {
    var scopes = ['user-follow-read'],
@@ -22,23 +19,19 @@ var authPromise = function(resolve,reject){
        '&response_type=token' +
        '&scope=' + encodeURIComponent(scopes) +
        '&redirect_uri=' + encodeURIComponent(redirectUri);
+       res.setHeader('Content-Type','text/html');
        res.redirect(url);
-       res.json({ message: 'hi' });
+       res.end();
  }
 
 function authorizeUser(req, res) {
   var id , name, chordialID;
   var code = req.swagger.params.code.value; //spotify code
-  var p1 = new Promise(function(resolve,reject){  //does not handle reject
-    spotifyApi.authorizationCodeGrant(code)   //trades code
-    .then(function(data){
-      spotifyApi.setAccessToken(data.body.access_token);  //gets access
-      res.json(data.body.access_token);
-      spotifyApi.setRefreshToken(data.body.refresh_token);
-      resolve();    //resolves promise
-    });
-  });           //End of authorization promise
-  p1.then(function(){
+  spotifyApi.authorizationCodeGrant(code)   //trades code
+  .then(function(data){
+    spotifyApi.setAccessToken(data.body.access_token);  //gets access
+    res.json(data.body.access_token);
+    spotifyApi.setRefreshToken(data.body.refresh_token);
     spotifyApi.getMe()    //Gets information about authorized user
     .then(function(data) {
       if (data.body.display_name === null)  //Spotify user no display name
@@ -63,7 +56,7 @@ function authorizeUser(req, res) {
             });       // end of user save function
           }   //end of creating new user
           else {
-            console.log(user);   //displays existing user
+            //console.log(user);   //displays existing user
           }
         }).then(function(){     //End of User.find -> sync top tracks and respond to server
           User.findOne({spotifyID:id}, function(err,user) {
@@ -84,8 +77,8 @@ function authorizeUser(req, res) {
         });           // End of User.find.then
       }, function(err) {
         console.log('Something went wrong!', err); //Error of getMe .then
-      });   //End of getMe .then
-  });   //End of promise p1 .then
+    });   //End of getMe .then
+  });
 } //End of authorization
 
 function detailMe(req,res){
@@ -102,7 +95,8 @@ function detailFriends(req,res){
 }
 
 function addFriend(req,res){
-  var id;
+  var id;/*
+  spotifyApi.setAccessToken(req.swagger.params.access_token);
   spotifyApi.getMe()
   .then(function (data) {
     id = data.body.id;
@@ -126,7 +120,25 @@ function addFriend(req,res){
     });
   }, function(err) {
     console.log('Something went wrong!', err);
+  });*/
+  myUser(spotifyApi)
+  .exec(function(err, user) {
+    User.findOne({name : req.swagger.params.friendName.value}, function(err, userF) {
+      if(err)
+        res.send(err);
+      if(userF === null)
+        res.json({ message: "Sorry, that user does not exist"});
+      else {
+      user.friends.push(userF.name);
+      user.save(function(err) {
+        if(err)
+          res.send(err);
+        console.log("New friend " + req.swagger.params.friendName.value + " added");
+        res.json({ message:'200'});
+      });
+    }
   });
+});
 
 }
 
@@ -135,7 +147,23 @@ function myMusic(req,res){
 }
 
 function shareCommon(req,res){
-
+  var common = [];
+  spotifyApi.setAccessToken(req.swagger.params.accessToken);
+  spotifyApi.getMe()
+  .then(function(err,data) {
+    User.findOne({spotifyID : data.body.id})
+    .exec(function(err, user) {
+      User.findOne({spotifyID : req.swagger.params.idC}, function(err, userF) {
+        if(err)
+          res.send(err);
+        for (var i = 0 ; i < user.tracks.length; i++)
+          for (var j = 0; j < userF.tracks.length; j++)
+            if(user.tracks[i].equals(userF.tracks[j]))
+              common.push(user.tracks[i]);
+      })
+      .then(res.json(common));
+    });
+  });
 }
 
 function getAll(req,res){
