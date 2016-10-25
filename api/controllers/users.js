@@ -95,7 +95,7 @@ function detailFriends(req,res){
 }
 
 function addFriend(req,res){
-  var id;/*
+  var id;
   spotifyApi.setAccessToken(req.swagger.params.access_token);
   spotifyApi.getMe()
   .then(function (data) {
@@ -120,7 +120,7 @@ function addFriend(req,res){
     });
   }, function(err) {
     console.log('Something went wrong!', err);
-  });*/
+  });/*
   myUser(spotifyApi)
   .exec(function(err, user) {
     User.findOne({name : req.swagger.params.friendName.value}, function(err, userF) {
@@ -138,7 +138,7 @@ function addFriend(req,res){
       });
     }
   });
-});
+});*/
 
 }
 
