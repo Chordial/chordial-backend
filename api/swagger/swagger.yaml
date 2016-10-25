@@ -51,9 +51,7 @@ paths:
         200:
           description: user is logged in
           schema:
-            type: array
-            items:
-              $ref: '#/definitions/User'
+            $ref: '#/definitions/Users'
 
     post:
       summary: add friend
@@ -83,9 +81,9 @@ paths:
       operationId: myMusic
       description: residentSleeper
       parameters:
-      - name: idC
+      - name: friendName
         in: body
-        required: false
+        required: true
         schema:
           type: string
       responses:
@@ -93,14 +91,18 @@ paths:
           description: I'm beyond sure this is ten times more work than actual coding
           schema:
             $ref: '#/definitions/Tracks'
+        400:
+          description: Failed to get music
+          schema:
+            type: string
 
   /me/share/{idC}:
     x-swagger-router-controller: users
 
     get:
-      summary: gets common songs between current user and other user
+      summary: I'm going to get to coding
       operationId: shareCommon
-      description: compares track arrays of each user and uses matching ids to return all common tracks
+      description: agjdakwentjwnt
       parameters:
       - name: idC
         in: path
@@ -110,9 +112,7 @@ paths:
         200:
           description: MANY A TRACK
           schema:
-            type: array
-            items:
-              $ref: '#/definitions/Track'
+            $ref: '#/definitions/Tracks'
 
 
   /user:
@@ -217,6 +217,11 @@ definitions:
         items:
           type: string
           description: List of Chordial User's IDs
+      tracks:
+        type: array
+        items:
+          type: string
+          description: List of User's Spotify Tracks
 
   Tracks:
     type: object
@@ -230,7 +235,7 @@ definitions:
   Track:
     type: object
     properties:
-      trackName:
+      url:
         type: string
-      trackID:
+      track_name:
         type: string
