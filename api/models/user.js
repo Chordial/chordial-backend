@@ -10,4 +10,9 @@ var UserSchema = new Schema({
   tracks : [String]
 });
 
+var TrackSchema = new Schema({
+  trackName : String,
+  trackID : String
+});
+
 module.exports = mongoose.model('User',UserSchema);
