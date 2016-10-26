@@ -12,16 +12,13 @@ module.exports = {authorizeUser, authorizeTesting, detailMe, detailFriends, addF
 
 
  function authorizeTesting(req,res) {
-   var scopes = ['user-follow-read'],
-       redirectUri = 'http://localhost:10010/user/authorize',
-       clientId = 'c0be0c89a1e241898635418ad5fbbbef';
-   var url = 'https://accounts.spotify.com/authorize?client_id=' + clientId +
-       '&response_type=token' +
-       '&scope=' + encodeURIComponent(scopes) +
-       '&redirect_uri=' + encodeURIComponent(redirectUri);
-       res.setHeader('Content-Type','text/html');
-       res.redirect(url);
-       res.end();
+   spotifyApi.authorizationCodeGrant(req.swagger.params.code.value)
+   .then(function(data) {
+     res.json(data.body.access_token);
+   }, function(err) {
+     console.log("Something went wrong! " + err);
+     res.send(err);
+   });
  }
 
 function authorizeUser(req, res) {
@@ -95,19 +92,13 @@ function detailFriends(req,res){
 }
 
 function addFriend(req,res){
-  var id;
-  spotifyApi.setAccessToken(req.swagger.params.access_token);
-  spotifyApi.getMe()
-  .then(function (data) {
-    id = data.body.id;
-    User.findOne({spotifyID : id})
-    .exec(function(err, user) {
-      User.findOne({name : req.swagger.params.friendName.value}, function(err, userF) {
-        if(err)
-          res.send(err);
-        if(userF === null)
-          res.json({ message: "Sorry, that user does not exist"});
-        else {
+  myUser(spotifyApi, User, function(err,user) {
+    if(err) console.log(err);
+    User.findOne({name : req.swagger.params.friendName.value}, function(err2, userF) {
+      if(err2) console.log(err2);
+      if(userF === null)
+        res.json({ message: "Sorry, that user does not exist"});
+      else {
         user.friends.push(userF.name);
         user.save(function(err) {
           if(err)
@@ -116,29 +107,8 @@ function addFriend(req,res){
           res.json({ message:'200'});
         });
       }
-    });
-    });
-  }, function(err) {
-    console.log('Something went wrong!', err);
-  });/*
-  myUser(spotifyApi)
-  .exec(function(err, user) {
-    User.findOne({name : req.swagger.params.friendName.value}, function(err, userF) {
-      if(err)
-        res.send(err);
-      if(userF === null)
-        res.json({ message: "Sorry, that user does not exist"});
-      else {
-      user.friends.push(userF.name);
-      user.save(function(err) {
-        if(err)
-          res.send(err);
-        console.log("New friend " + req.swagger.params.friendName.value + " added");
-        res.json({ message:'200'});
-      });
-    }
   });
-});*/
+});
 
 }
 
