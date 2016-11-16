@@ -8,7 +8,17 @@ var spotifyApi = new SpotifyWebApi({
   redirectUri : 'http://localhost:10010/user/callback'
 });
 
-module.exports = {authorizeUser, authorizeTesting, detailMe, detailFriends, addFriend, myMusic, shareCommon, getAll, deleteThemAll, addTrack}; // jshint ignore:line
+module.exports = {
+  authorizeUser: authorizeUser,
+  authorizeTesting: authorizeTesting,
+  detailMe: detailMe,
+  detailFriends: detailFriends,
+  addFriend: addFriend,
+  myMusic: myMusic,
+  shareCommon: shareCommon,
+  getAll: getAll,
+  deleteThemAll: deleteThemAll,
+  addTrack: addTrack};
 
 
  function authorizeTesting(req,res) {
@@ -113,11 +123,49 @@ function addFriend(req,res){
 });
 
 }
-
-function myMusic(req,res){
-
+function deleteMusic(req,res){
+  var id;
+  spotifyApi.getMe()
+  .then(function(data){
+    id = data.body.id;
+    User.findOne({spotifyID : id})
+    .exec(function (err, user){
+      user.tracks = [];
+      user.save(function(err){
+        console.log(err);
+      });
+      console.log(user.tracks);
+    },
+    function(err){
+      console.log(err);
+    });
+  });
 }
 
+function myMusic(req,res){
+  var id;
+  spotifyApi.getMe()
+  .then(function(data){
+    id = data.body.id;
+    User.findOne({spotifyID : id})
+    .exec(function (err, user){
+      user.tracks = [];
+      spotifyApi.getMyTopTracks({limit:50})
+      .then(function(toptracks) {
+        toptracks.body.items.forEach(function(track){
+          user.tracks.push(track.name);
+          console.log(track.name);
+        });//Populates user tracks with id of top tracks
+        user.save(function(err){
+          console.log(err);
+        });
+      } , function(err) {
+            console.log('Something went wrong!', err);
+          });
+    });
+  });
+
+}
 function recommend(req,res) {
   var recommended = [];
   myUser(spotifyApi , function(err,user) {
