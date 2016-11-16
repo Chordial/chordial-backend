@@ -1,17 +1,19 @@
 var SpotifyWebApi = require('spotify-web-api-node');
-var User = require('../models/user.js');
+require('../models/user.js');
 
 module.exports = function(){
-  this.myUser = function (spotifyApi) {
+  this.myUser = function (spotifyApi, User, callback) {
     spotifyApi.getMe()
     .then(function (data) {
       var id = data.body.id;
-      var query = User.findOne({spotifyID : id});
-      console.log(typeof query);
-      console.log(query);
-      return query;
-    }, function(err){
-      console.log(err);
+      User.findOne({spotifyID : id}, function(err,user) {
+        if (err) {
+          callback(err , null);
+        }
+        else {
+          callback(null,user);
+        }
+      });
     });
   };
 };
