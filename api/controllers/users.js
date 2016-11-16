@@ -88,11 +88,13 @@ function detailMe(req,res){
 }
 
 function detailFriends(req,res){
+  myUser(spotifyApi, function(err, user) {
 
+  });
 }
 
 function addFriend(req,res){
-  myUser(spotifyApi, User, function(err,user) {
+  myUser(spotifyApi, function(err,user) {
     if(err) console.log(err);
     User.findOne({name : req.swagger.params.friendName.value}, function(err2, userF) {
       if(err2) console.log(err2);
@@ -116,8 +118,25 @@ function myMusic(req,res){
 
 }
 
+function recommend(req,res) {
+  var recommended = [];
+  myUser(spotifyApi , function(err,user) {
+    var seeds = user.tracks.slice(0,5);
+    spotifyApi.getRecommendations({seed_tracks:seeds})
+    .then(function(rectracks) {
+      rectracks.body.items.forEach(function(track){
+        recommended.push(track.name);
+      });//Populates user tracks with id of top tracks
+    },function(err) {
+      console.log('Something went wrong!', err);
+    });
+    res.json(recommended);
+  });
+}
+
 function shareCommon(req,res){
-  var common = [],id;
+  var common = [];
+  var id;
   //spotifyApi.setAccessToken(req.swagger.params.accessToken);
   spotifyApi.getMe()
   .then(function(data) {
