@@ -125,6 +125,25 @@ paths:
             items:
               type: string
 
+  /me/recommend:
+    x-swagger-router-controller: users
+
+    get:
+      summary: gets song recommendations for user
+      operationId: recommend
+      description: sends user top tracks as seeds for spotify api recommendations
+      parameters:
+      - name: accessToken
+        in: header
+        required: false
+        type: string
+      responses:
+        200:
+          description: MANY A TRACK
+          schema:
+            type: array
+            items:
+              type: string
 
   /user:
     x-swagger-router-controller: users
