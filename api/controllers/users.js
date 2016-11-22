@@ -232,6 +232,26 @@ function getAll(req,res){
   });
 }
 
+function createPlaylist(req,res){
+  var id;
+  var playlistName = req.swagger.params.playListName.value;
+  spotifyApi.getMe()
+  .then(function(data){
+    id = data.body.id;
+    User.findOne({spotifyID : id})
+    .exec(function (err, user){
+      spotifyApi.createPlaylist(id, playlistName);
+      console.log('Got Playlist');
+      /*.then(function(data){
+        spotifyApi.addTracksToPlaylist(id, data.body.id, user.tracks);
+      });*/
+    },
+    function(err){
+      console.log(err);
+    });
+  });
+}
+
 function deleteThemAll(req,res){
   User.remove({} , function(err, user) {
     if (err)
