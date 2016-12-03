@@ -1,6 +1,7 @@
 var Promise = require('promise');
 var SpotifyWebApi = require('spotify-web-api-node');
-var User = require('../models/user.js');
+var User = (require('../models/user.js')).User;
+var Track = (require('../models/user.js')).Track;
 require('../helpers/helpusers.js')();
 var spotifyApi = new SpotifyWebApi({
   clientId : 'c0be0c89a1e241898635418ad5fbbbef',
@@ -15,10 +16,13 @@ module.exports = {
   detailFriends: detailFriends,
   addFriend: addFriend,
   myMusic: myMusic,
+  deleteMusic: deleteMusic,
   shareCommon: shareCommon,
   getAll: getAll,
+  getUser: getUser,
   deleteThemAll: deleteThemAll,
-  addTrack: addTrack};
+  addTrack: addTrack
+};
 
 
  function authorizeTesting(req,res) {
@@ -65,7 +69,7 @@ function authorizeUser(req, res) {
           else {
             //console.log(user);   //displays existing user
           }
-        }).then(function(){     //End of User.find -> sync top tracks and respond to server
+        });/*.then(function(){     //End of User.find -> sync top tracks and respond to server
           User.findOne({spotifyID:id}, function(err,user) {
             user.tracks = [];
             spotifyApi.getMyTopTracks({limit:50})
@@ -74,14 +78,15 @@ function authorizeUser(req, res) {
                 user.tracks.push(track.name);
               });//Populates user tracks with id of top tracks
               user.save(function(err){
-                console.log(err);
+                if(err)
+                  console.log(err);
               });
             },function(err) {
               console.log('Something went wrong!', err);
             });
           });
           res.json({ message:'200'});   //Send 200 or user ID
-        });           // End of User.find.then
+        });           // End of User.find.then  */
       }, function(err) {
         console.log('Something went wrong!', err); //Error of getMe .then
     });   //End of getMe .then
@@ -89,17 +94,18 @@ function authorizeUser(req, res) {
 } //End of authorization
 
 function detailMe(req,res){
-  spotifyApi.getMe()
-  .then(function(data) {
-    console.log('Some information about the authenticated user', data.body);
-  }, function(err) {
-    console.log('Something went wrong!', err);
+  myUser(spotifyApi, function(err, user) {
+    if(err)
+      console.log(err);
+    res.json(user);
   });
 }
 
 function detailFriends(req,res){
   myUser(spotifyApi, function(err, user) {
-
+    if(err)
+      console.log(err);
+    res.json(user.friends);
   });
 }
 
@@ -119,57 +125,56 @@ function addFriend(req,res){
           res.json({ message:'200'});
         });
       }
-  });
-});
-
-}
-function deleteMusic(req,res){
-  var id;
-  spotifyApi.getMe()
-  .then(function(data){
-    id = data.body.id;
-    User.findOne({spotifyID : id})
-    .exec(function (err, user){
-      user.tracks = [];
-      user.save(function(err){
-        console.log(err);
-      });
-      console.log(user.tracks);
-    },
-    function(err){
-      console.log(err);
     });
   });
 }
+function deleteMusic(req,res){
+  myUser(spotifyApi, function (err, user){
+    if(err)
+      console.log(err);
+    user.tracks = [];
+    user.save(function(err){
+      if(err)
+        console.log(err);
+      });
+    res.json({message:'200'});
+    console.log(user.tracks);
+    });
+  }
 
-function myMusic(req,res){
-  var id;
-  spotifyApi.getMe()
-  .then(function(data){
-    id = data.body.id;
-    User.findOne({spotifyID : id})
-    .exec(function (err, user){
+  function myMusic(req,res){
+    myUser(spotifyApi, function (err, user){
       user.tracks = [];
       spotifyApi.getMyTopTracks({limit:50})
       .then(function(toptracks) {
+        console.log(toptracks);
         toptracks.body.items.forEach(function(track){
-          user.tracks.push(track.name);
+          console.log(track.id);
           console.log(track.name);
-        });//Populates user tracks with id of top tracks
-        user.save(function(err){
-          console.log(err);
-        });
-      } , function(err) {
-            console.log('Something went wrong!', err);
+          Track.findOneAndUpdate(
+            { trackID: track.id },
+            { trackID: track.id, trackName: track.name },
+            {new: true , upsert: true},
+            function(err, track2) {
+              console.log(track2);
+              user.tracks.push(track2);
+              user.save(function(err){
+                if(err)
+                  console.log(err);
+              });
+            });
           });
+        res.json({message:'200'});
+      });
     });
-  });
+  }
 
-}
 function recommend(req,res) {
   var recommended = [];
   myUser(spotifyApi , function(err,user) {
-    var seeds = user.tracks.slice(0,5);
+    var seeds = user.tracks.map(function(track) {
+      return(track.trackID);
+    });
     spotifyApi.getRecommendations({seed_tracks:seeds})
     .then(function(rectracks) {
       rectracks.body.items.forEach(function(track){
@@ -184,13 +189,7 @@ function recommend(req,res) {
 
 function shareCommon(req,res){
   var common = [];
-  var id;
-  //spotifyApi.setAccessToken(req.swagger.params.accessToken);
-  spotifyApi.getMe()
-  .then(function(data) {
-    id = data.body.id;
-    User.findOne({spotifyID : id})
-    .exec(function(err, user) {
+  myUser(function(err, user) {
       User.findOne({spotifyID : req.swagger.params.idC.value}, function(err, userF) {
         if(err)
           res.send(err);
@@ -206,7 +205,6 @@ function shareCommon(req,res){
         res.json(common);
       });
     });
-  });
 }
 
 function addTrack(req,res){
@@ -229,6 +227,15 @@ function getAll(req,res){
       if (err)
           res.send(err);
       res.json(users);
+  });
+}
+
+function getUser(req,res){
+  User.findOne({spotifyID:req.swagger.params.userName.value}).select('-_id').select('-__v')
+  .exec(function(err,user) {
+    if (err)
+      console.log(err);
+    res.json(user===null);
   });
 }
 

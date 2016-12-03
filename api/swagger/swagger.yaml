@@ -99,7 +99,21 @@ paths:
         200:
           description: I'm beyond sure this is ten times more work than actual coding
           schema:
-            $ref: '#/definitions/Tracks'
+            type: string
+
+    delete:
+      operationId: deleteMusic
+      description: clears a user's list of top tracks
+      parameters:
+      - name: accessToken
+        in: header
+        required: false
+        type: string
+      responses:
+        200:
+          description: successfully deleted tracks
+          schema:
+            type: string
 
   /me/share/{idC}:
     x-swagger-router-controller: users
@@ -159,7 +173,22 @@ paths:
             items:
               $ref: '#/definitions/User'
 
+  /user/{userName}:
+    x-swagger-router-controller: users
 
+    get:
+      operationId: getUser
+      description: find user with given username
+      parameters:
+      - name: userName
+        in: path
+        type: string
+        required: true
+      responses:
+        200:
+          description: user found or not
+          schema:
+            type: string
 
   /user/authorizeTesting/{code}:
     x-swagger-router-controller: users
@@ -234,6 +263,162 @@ paths:
           schema:
             type: string
 
+  /session:
+    x-swagger-router-controller: songQueue
+    get:
+      operationId: isSession
+      description: returns boolean true if session with given id exists, false if not
+      parameters:
+      - name: sessionID
+        in: header
+        required: true
+        type: string
+      responses:
+        200:
+          description: response sent
+          schema:
+            type: string
+
+  /{sessionId}:
+    x-swagger-router-controller: songQueue
+    get:
+      operationId: findSession
+      description: Returns a session if it exists and error if not
+      parameters:
+      - name: sessionId
+        in: path
+        required: true
+        type: string
+      responses:
+        200:
+          description: sucessful response
+          schema:
+            type: string
+    post:
+      operationId: joinSession
+      description: send user information to enter a chordial session
+      parameters:
+      - name: userName
+        in: header
+        type: string
+        required: true
+      - name: sessionId
+        in: path
+        required: true
+        type: string
+      responses:
+        200:
+          description: sucessfully joined sesssion
+          schema:
+            type: string
+    delete:
+      operationId: deleteSession
+      description: removes a session from chordial memory
+      parameters:
+      - name: authorizationid
+        in: header
+        required: false
+        type: string
+      - name: sessionId
+        in: path
+        required: true
+        type: string
+      responses:
+        200:
+          description: sucessfully deleted
+          schema:
+            type: string
+
+  /{sessionId}/queueAction:
+    x-swagger-router-controller: songQueue
+    get:
+      operationId: queueGetData
+      description: stores data from frontend queue current state
+      parameters:
+      - name: getActionId
+        in: header
+        required: true
+        type: string
+      - name: actionData
+        in: body
+        required: false
+        schema:
+          type: string
+      - name: sessionId
+        in: path
+        required: true
+        type: string
+      responses:
+        200:
+          description: server received information
+          schema:
+            type: string
+    post:
+      operationId: queueStoreData
+      description: stores data from frontend queue current state
+      parameters:
+      - name: storeActionId
+        in: header
+        required: true
+        type: string
+      - name: sessionId
+        in: path
+        required: true
+        type: string
+      responses:
+        201:
+          description: server received information
+          schema:
+            type: string
+
+  /{sessionId}/queue:
+    x-swagger-router-controller: songQueue
+    post:
+      operationId: addToQueue
+      description: adds track to position in queue
+      parameters:
+      - name: trackId
+        in: header
+        required: true
+        type: string
+      - name: sessionId
+        in: path
+        required: true
+        type: string
+      responses:
+        201:
+          description: track added to queue success
+          schema:
+            type: string
+    delete:
+      operationId: deleteFromQueue
+      description: deletes a track from the session queue
+      parameters:
+      - name: trackId
+        in: header
+        required: true
+        type: string
+      - name: sessionId
+        in: path
+        required: true
+        type: string
+      responses:
+        200:
+          description: track deleted from queue
+          schema:
+            type: string
+
+
+  /createSession:
+    x-swagger-router-controller: songQueue
+    get:
+      operationId: createSession
+      description: creates new session
+      responses:
+        200:
+          description: new session created, returns Id of session
+          schema:
+            type: string
 
 
   /swagger:
