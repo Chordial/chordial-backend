@@ -1,5 +1,5 @@
 var SpotifyWebApi = require('spotify-web-api-node');
-require('../models/user.js');
+var User = (require('../models/user.js')).User;
 
 module.exports = function(){
   this.myUser = function (spotifyApi, callback) {
