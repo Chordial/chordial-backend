@@ -329,6 +329,22 @@ paths:
           schema:
             type: string
 
+  /{sessionId}/start:
+    x-swagger-router-controller: songQueue
+    get:
+      operationId: startSession
+      description: initiallizes session queue with current users songs
+      parameters:
+      - name: sessionId
+        in: path
+        required: true
+        type: string
+      responses:
+        200:
+          description: send back populated queue
+          schema:
+            $ref: '#/definitions/Tracks'
+
   /{sessionId}/queueAction:
     x-swagger-router-controller: songQueue
     get:
@@ -456,6 +472,11 @@ definitions:
         items:
           type: string
           description: List of Chordial User's IDs
+      tracks:
+        type: array
+        items:
+          $ref: '#/definitions/Track'
+
 
   Tracks:
     type: object

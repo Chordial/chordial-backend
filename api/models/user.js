@@ -1,19 +1,18 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
+var TrackSchema = new Schema({
+  trackName : String,
+  trackID : String
+});
 
 var UserSchema = new Schema({
   name : String,
   spotifyID : String,
   chordialID : String,
   friends : [String],
-  tracks : [String]
+  tracks : [TrackSchema]
   //playLists:[PlayListSchema]
-});
-
-var TrackSchema = new Schema({
-  trackName : String,
-  trackID : String
 });
 
 var PlayListSchema = new Schema({

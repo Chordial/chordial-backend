@@ -9,6 +9,7 @@ module.exports = {
   findSession : findSession,
   joinSession : joinSession,
   deleteSession : deleteSession,
+  startSession : startSession,
   queueStoreData : queueStoreData,
   queueGetData : queueGetData,
   addToQueue : addToQueue,
@@ -36,6 +37,12 @@ function createSession(req,res) {
       console.log("Session created with id " + session.sessionID);
       return res.json(session.sessionID);
     });
+}
+
+function startSession(req,res) {
+  Session.findOne({sessionID:req.swagger.params.sessionId.value} , function(err, session) {
+
+  });
 }
 
 function findSession(req,res) {

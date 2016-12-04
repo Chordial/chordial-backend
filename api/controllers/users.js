@@ -97,6 +97,8 @@ function detailMe(req,res){
   myUser(spotifyApi, function(err, user) {
     if(err)
       console.log(err);
+    console.log("This is me");
+    console.log(user);
     res.json(user);
   });
 }
@@ -145,22 +147,22 @@ function deleteMusic(req,res){
   function myMusic(req,res){
     myUser(spotifyApi, function (err, user){
       user.tracks = [];
+      var recTracks = []; // using this to get all the tracks together first, not sure if it will work
       spotifyApi.getMyTopTracks({limit:50})
       .then(function(toptracks) {
-        console.log(toptracks);
         toptracks.body.items.forEach(function(track){
-          console.log(track.id);
           console.log(track.name);
           Track.findOneAndUpdate(
             { trackID: track.id },
             { trackID: track.id, trackName: track.name },
-            {new: true , upsert: true},
+            { new: true , upsert: true},
             function(err, track2) {
               console.log(track2);
-              user.tracks.push(track2);
-              user.save(function(err){
+              recTracks.push(track2);
+              user.save(function(err){ //This should be moved to outside the loop
                 if(err)
                   console.log(err);
+                console.log(user);
               });
             });
           });
