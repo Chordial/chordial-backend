@@ -407,6 +407,24 @@ paths:
           description: track deleted from queue
           schema:
             type: string
+            
+  /{sessionId}/recommend:
+    x-swagger_router_controller: recommend
+    get:
+      operationId: recommendPlaylist
+      description: recommends playlist based on session
+      parameters:
+      - name: sessionId
+        in: path
+        required: true
+        type: string
+      responses:
+        200:
+          description: recommended playlist returned
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Track'
 
 
   /createSession:
@@ -419,6 +437,7 @@ paths:
           description: new session created, returns Id of session
           schema:
             type: string
+            
 
 
   /swagger:
