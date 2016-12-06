@@ -212,6 +212,7 @@ function recommend(req,res) {
       rectracks.forEach(function(track) {
         session.queue.trackList.push(track);
       });
+      session.queue.currentTrack = session.queue.trackList[0];
       session.save(function(err) {
         if(err)
           console.log(err);

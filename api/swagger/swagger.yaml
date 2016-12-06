@@ -353,13 +353,8 @@ paths:
       parameters:
       - name: getActionId
         in: query
-        required: true
-        type: string
-      - name: actionData
-        in: body
         required: false
-        schema:
-          type: string
+        type: string
       - name: sessionId
         in: path
         required: true
@@ -368,7 +363,7 @@ paths:
         200:
           description: server received information
           schema:
-            $ref: '#/definitions/User'
+            type: string
 
     post:
       operationId: queueStoreData
@@ -377,6 +372,10 @@ paths:
       - name: storeActionId
         in: query
         required: true
+        type: string
+      - name: actionData
+        in: query
+        required: false
         type: string
       - name: sessionId
         in: path
