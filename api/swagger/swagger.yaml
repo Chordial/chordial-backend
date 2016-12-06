@@ -343,7 +343,7 @@ paths:
         200:
           description: send back populated queue
           schema:
-            $ref: '#/definitions/Tracks'
+            type: string
 
   /{sessionId}/queueAction:
     x-swagger-router-controller: songQueue
@@ -368,7 +368,8 @@ paths:
         200:
           description: server received information
           schema:
-            type: string
+            $ref: '#/definitions/User'
+
     post:
       operationId: queueStoreData
       description: stores data from frontend queue current state
@@ -461,6 +462,16 @@ paths:
           schema:
             type: string
 
+  /sessions:
+    x-swagger-router-controller: songQueue
+    get:
+      operationId: getAllSessions
+      description: returns all sessions in database
+      responses:
+        200:
+          description: sessions all found
+          schema:
+            type: string
 
   /swagger:
     x-swagger-pipe: swagger_raw
@@ -502,6 +513,19 @@ definitions:
         items:
           type: string
 
+  Queue:
+    type: object
+    properties:
+      isPaused:
+        type: boolean
+      currentTrackName:
+        type: string
+      seekTime:
+        type: string
+      tracks:
+        type: array
+        items:
+          type: string
 
   Tracks:
     type: object

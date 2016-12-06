@@ -2,6 +2,7 @@ var Queue = (require('../models/user.js')).Queue;
 var User = (require('../models/user.js')).User;
 var Session = (require('../models/user.js')).Session;
 var Track = (require('../models/user.js')).Track;
+var userDB = require('./users.js');
 require('../helpers/helpusers.js')();
 
 module.exports = {
@@ -41,8 +42,19 @@ function createSession(req,res) {
 
 function startSession(req,res) {
   Session.findOne({sessionID:req.swagger.params.sessionId.value} , function(err, session) {
-    session.queue = recommend(session.users);
-
+    if(err)
+      console.log(err);
+    session.queue = new Queue({
+      isPaused: true,
+      seekTime: 0,
+      trackList: []
+    });
+    userDB.recommend(req,res);
+    session.save(function(err) {
+      if(err)
+        console.log(err);
+    });
+    res.json("200");
   });
 }
 
@@ -59,7 +71,7 @@ function joinSession(req,res) {
   Session.findOne({sessionID : req.swagger.params.sessionId.value}, function(err, session) {
     if(err)
       console.log(err);
-    if(req.swagger.params.guestName.value !== null){
+    if(req.swagger.params.guestName !== undefined){
       session.guests.push(guestName);
       session.save(function(err) {
         if(err)
@@ -117,7 +129,11 @@ function queueStoreData(req,res) {
 }
 
 function queueGetData(req,res) {
-
+  Session.findOne({sessionID : req.swagger.params.sessionId.value} , function(err, session) {
+    if(err)
+      console.log(err);
+    var data = [session.queue.isPaused, session.queue.currentTrackName, session.queue.saveTime];
+  });
 }
 
 function addToQueue(req,res) {
@@ -150,5 +166,13 @@ function isSession(req,res) {
     if(err)
       console.log(err);
     res.json(session === null);
+  });
+}
+
+function getAllSessions(req,res) {
+  Session.find().select('-_id').select('-__v').exec(function(err, sessions) {
+      if (err)
+          res.send(err);
+      res.json(sessions);
   });
 }

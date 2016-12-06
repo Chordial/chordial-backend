@@ -19,6 +19,7 @@ module.exports = {
   myMusic: myMusic,
   deleteMusic: deleteMusic,
   shareCommon: shareCommon,
+  recommend: recommend,
   getAll: getAll,
   getUser: getUser,
   deleteThemAll: deleteThemAll,
@@ -170,20 +171,40 @@ function myMusic(req,res){
 
 function recommend(req,res) {
   var recommended = [];
-  myUser(spotifyApi , function(err,user) {
-    var seeds = user.tracks.map(function(track) {
-      return(track.trackID);
-    });
-    spotifyApi.getRecommendations({seed_genres:["anime"]})
-    .then(function(rectracks) {
-      console.log(rectracks.body.tracks.length);
-      for (var i = 0 ; i < rectracks.body.tracks.length; i++)
-      {
-        recommended.push(rectracks.body.tracks[i].id);
+  var allSongs = [];
+  var dupeSongs = [];
+  Session.findOne({sessionID : req.swagger.params.sessionId.value} , function(err, session) {
+    if(err)
+      console.log(err);
+    for (var i = 0; i < session.users.length; i++) {
+      for (var j = 0; j < session.users[i].tracks.length; j++) {
+        if (allSongs.indexOf(session.users[i].tracks[j]) == -1)
+          allSongs.push(session.users[i].tracks[j]);
+        else if (dupeSongs.indexOf(session.users[i].tracks[j]) == -1) {
+          dupeSongs.push(session.users[i].tracks[j]);
+        }
       }
-      res.json(recommended);
-    },function(err) {
-      console.log('Something went wrong!', err);
+    }
+    if (dupeSongs.length === 0) {
+      if(session.users.length < 5) {
+        for (var k = 0; k < 5; k++) {
+          dupeSongs.push(session.users[0].tracks[k]);
+        }
+      }
+      else {
+        for(var l = 0; l < 5; l++){
+          dupeSongs.push(session.users[l].tracks[l]);
+        }
+      }
+    }
+    if (dupeSongs.length > 5)
+      dupeSongs = dupeSongs.slice(0,5);
+    var seeds = dupeSongs;
+    spotifyApi.getRecommendations({seed_tracks : seeds} , function(err, tracks2) { //recommended tracks is undefined here don't know why
+      console.log(seeds);
+      console.log(tracks2);
+      session.queue.trackList.push(tracks2);
+      return tracks2;
     });
   });
 }
@@ -242,7 +263,6 @@ function getAll(req,res){
   User.find().select('-_id').select('-__v').exec(function(err, users) {
       if (err)
           res.send(err);
-      console.log(users);
       res.json(users);
   });
 }
