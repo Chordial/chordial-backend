@@ -21,7 +21,8 @@ module.exports = {
   getAll: getAll,
   getUser: getUser,
   deleteThemAll: deleteThemAll,
-  addTrack: addTrack
+  addTrack: addTrack,
+  recommend: recommend
 };
 
 
@@ -175,15 +176,17 @@ function recommend(req,res) {
     var seeds = user.tracks.map(function(track) {
       return(track.trackID);
     });
-    spotifyApi.getRecommendations({seed_tracks:seeds})
+    spotifyApi.getRecommendations({seed_genres:["anime"]})
     .then(function(rectracks) {
-      rectracks.body.items.forEach(function(track){
-        recommended.push(track.name);
-      });//Populates user tracks with id of top tracks
+      console.log(rectracks.body.tracks.length);
+      for (var i = 0 ; i < rectracks.body.tracks.length; i++)
+      {
+        recommended.push(rectracks.body.tracks[i].id);
+      };
+      res.json(recommended);
     },function(err) {
       console.log('Something went wrong!', err);
     });
-    res.json(recommended);
   });
 }
 
