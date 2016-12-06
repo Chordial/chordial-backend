@@ -151,6 +151,13 @@ paths:
         in: header
         required: false
         type: string
+      - name: songs
+        in: body
+        required: true
+        schema: 
+          type: array
+          items:
+            $ref: '#/definitions/Track'
       responses:
         200:
           description: MANY A TRACK

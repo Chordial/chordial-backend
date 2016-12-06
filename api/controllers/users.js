@@ -176,12 +176,13 @@ function recommend(req,res) {
     var seeds = user.tracks.map(function(track) {
       return(track.trackID);
     });
-    spotifyApi.getRecommendations({seed_genres:["anime"]})
+    spotifyApi.getRecommendations({seed_songs:[req.swagger.params.songs.value]})
     .then(function(rectracks) {
       console.log(rectracks.body.tracks.length);
       for (var i = 0 ; i < rectracks.body.tracks.length; i++)
       {
         recommended.push(rectracks.body.tracks[i].id);
+
       };
       res.json(recommended);
     },function(err) {
