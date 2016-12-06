@@ -412,10 +412,10 @@ paths:
       operationId: deleteFromQueue
       description: deletes a track from the session queue
       parameters:
-      - name: trackId
+      - name: trackPosition
         in: query
         required: true
-        type: string
+        type: number
       - name: sessionId
         in: path
         required: true

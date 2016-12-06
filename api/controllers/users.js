@@ -3,6 +3,7 @@ var SpotifyWebApi = require('spotify-web-api-node');
 var User = (require('../models/user.js')).User;
 var Track = (require('../models/user.js')).Track;
 var Session = (require('../models/user.js')).Session;
+var Queue = (require('../models/user.js')).Queue;
 require('../helpers/helpusers.js')();
 var spotifyApi = new SpotifyWebApi({
   clientId : 'c0be0c89a1e241898635418ad5fbbbef',
@@ -208,7 +209,12 @@ function recommend(req,res) {
         return track.id;
       });
       console.log(rectracks);
-      session.queue.trackList.push(rectracks);
+      session.queue = new Queue({
+        isPaused: true,
+        seekTime: 0,
+        trackList: []
+      });
+      session.queue.trackList = rectracks;
       session.save(function(err) {
         if(err)
           console.log(err);

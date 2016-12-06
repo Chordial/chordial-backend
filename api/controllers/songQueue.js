@@ -44,11 +44,6 @@ function startSession(req,res) {
   Session.findOne({sessionID:req.swagger.params.sessionId.value} , function(err, session) {
     if(err)
       console.log(err);
-    session.queue = new Queue({
-      isPaused: true,
-      seekTime: 0,
-      trackList: []
-    });
     userDB.recommend(req,res);
   });
 }
@@ -91,6 +86,7 @@ function deleteSession(req,res) {
   Session.remove({sessionID : req.swagger.params.sessionId.value} , function(err) {
     if (err)
       console.log(err);
+    res.json("200");
     console.log(" Complete!");
   });
 }
@@ -135,11 +131,12 @@ function addToQueue(req,res) {
   Session.findOne({sessionID : req.swagger.params.sessionId.value} , function(err, session) {
     if(err)
       console.log(err);
-    session.queue.trackList.unshift(new Track({trackID : req.swagger.params.trackId.value}));
+    session.queue.trackList.unshift(req.swagger.params.trackId.value);
     session.save(function(err){
       if(err)
         console.log(err);
       console.log("track added");
+      res.json("200");
     });
   });
 }
@@ -148,10 +145,11 @@ function deleteFromQueue(req,res) {
   Session.findOne({sessionID : req.swagger.params.sessionId.value} , function(err, session) {
     if(err)
       console.log(err);
-    session.queue.trackList.forEach(function(track,index,array) {
-      if(track.trackName.equals(req.swagger.params.sessionId.value)){
-        session.queue.trackList.splice(pos,index);
-      }
+    session.queue.trackList.splice(req.swagger.params.trackPosition.value,req.swagger.params.trackPosition.value+1);
+    session.save(function(err) {
+      if(err)
+        console.log(err);
+      res.json("200");
     });
   });
 }
