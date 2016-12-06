@@ -1,24 +1,21 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
+var TrackSchema = new Schema({
+  trackName : String,
+  trackID : String
+});
 
 var UserSchema = new Schema({
   name : String,
   spotifyID : String,
   chordialID : String,
   friends : [String],
-  tracks : [String]
-  //playLists:[PlayListSchema]
-});
-
-var TrackSchema = new Schema({
-  trackName : String,
-  trackID : String
+  tracks : [String],
 });
 
 var PlayListSchema = new Schema({
   playListName : String,
-  playListId : String,
   tracks : [TrackSchema]
 });
 
@@ -26,13 +23,14 @@ var QueueSchema = new Schema({
   currentTrackName : String,
   isPaused : Boolean,
   seekTime : Number,
-  trackList : [TrackSchema]
+  trackList : [String]
 });
 
 var SessionSchema = new Schema({
   sessionName : String,
   sessionID : String,
   users : [UserSchema],
+  guests: [String],
   queue : QueueSchema
 });
 
