@@ -200,11 +200,20 @@ function recommend(req,res) {
     if (dupeSongs.length > 5)
       dupeSongs = dupeSongs.slice(0,5);
     var seeds = dupeSongs;
-    spotifyApi.getRecommendations({seed_tracks : seeds} , function(err, tracks2) { //recommended tracks is undefined here don't know why
+    spotifyApi.getRecommendations({seed_tracks : seeds} , function(err, data) {
+      if(err)
+        console.log(err);
       console.log(seeds);
-      console.log(tracks2);
-      session.queue.trackList.push(tracks2);
-      return tracks2;
+      var rectracks = data.body.tracks.map(function(track) {
+        return track.id;
+      });
+      console.log(rectracks);
+      session.queue.trackList.push(rectracks);
+      session.save(function(err) {
+        if(err)
+          console.log(err);
+        res.json("200");
+      });
     });
   });
 }

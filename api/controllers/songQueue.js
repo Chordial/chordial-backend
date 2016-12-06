@@ -50,11 +50,6 @@ function startSession(req,res) {
       trackList: []
     });
     userDB.recommend(req,res);
-    session.save(function(err) {
-      if(err)
-        console.log(err);
-    });
-    res.json("200");
   });
 }
 
