@@ -1,7 +1,8 @@
-var Promise = require('promise');
+var querystring = require('querystring');
 var SpotifyWebApi = require('spotify-web-api-node');
 var User = (require('../models/user.js')).User;
 var Track = (require('../models/user.js')).Track;
+var Session = (require('../models/user.js')).Session;
 require('../helpers/helpusers.js')();
 var spotifyApi = new SpotifyWebApi({
   clientId : 'c0be0c89a1e241898635418ad5fbbbef',
@@ -144,32 +145,28 @@ function deleteMusic(req,res){
     });
   }
 
-  function myMusic(req,res){
-    myUser(spotifyApi, function (err, user){
-      user.tracks = [];
-      var recTracks = []; // using this to get all the tracks together first, not sure if it will work
-      spotifyApi.getMyTopTracks({limit:50})
-      .then(function(toptracks) {
-        toptracks.body.items.forEach(function(track){
-          console.log(track.name);
-          Track.findOneAndUpdate(
-            { trackID: track.id },
-            { trackID: track.id, trackName: track.name },
-            { new: true , upsert: true},
-            function(err, track2) {
-              console.log(track2);
-              recTracks.push(track2);
-              user.save(function(err){ //This should be moved to outside the loop
-                if(err)
-                  console.log(err);
-                console.log(user);
-              });
-            });
-          });
-        res.json({message:'200'});
+function myMusic(req,res){
+  myUser(spotifyApi, function (err, user){
+    user.tracks = [];
+    spotifyApi.getMyTopTracks({limit:50})
+    .then(function(toptracks) {
+      toptracks.body.items.forEach(function(track){
+        console.log(track.id);
+        user.tracks.push(track.id);
+      });//Populates user tracks with id of top tracks
+      user.save(function(err){
+        if(err)
+          console.log(err);
+        else {
+          res.json({ message:'200'});
+        }
       });
+    },function(err) {
+      console.log('Something went wrong!', err);
     });
-  }
+  });
+  //res.json({ message:'200'});   //Send 200 or user ID          // End of User.find.then  */
+}
 
 function recommend(req,res) {
   var recommended = [];
@@ -177,15 +174,17 @@ function recommend(req,res) {
     var seeds = user.tracks.map(function(track) {
       return(track.trackID);
     });
-    spotifyApi.getRecommendations({seed_tracks:seeds})
+    spotifyApi.getRecommendations({seed_genres:["anime"]})
     .then(function(rectracks) {
-      rectracks.body.items.forEach(function(track){
-        recommended.push(track.name);
-      });//Populates user tracks with id of top tracks
+      console.log(rectracks.body.tracks.length);
+      for (var i = 0 ; i < rectracks.body.tracks.length; i++)
+      {
+        recommended.push(rectracks.body.tracks[i].id);
+      }
+      res.json(recommended);
     },function(err) {
       console.log('Something went wrong!', err);
     });
-    res.json(recommended);
   });
 }
 
@@ -224,10 +223,26 @@ function addTrack(req,res){
   res.json({message:'200'});
 }
 
+function getQueue(req,res) {
+  myUser(spotifyApi, function(err,user) {
+    Session.findOne({sessionID:req.swagger.params.sessionID.value} , function(err, session) {
+      if(err)
+        console.log(err);
+      spotifyApi.createPlaylist(user.spotifyID,req.swagger.params.playlistName.value)
+      .exec(function(err,playlist) {
+        if(err)
+          console.log(err);
+        spotifyApi.addTracksToPlaylist(user.spotifyID,playlist.id,session.queue.trackList);
+      });
+    });
+  });
+}
+
 function getAll(req,res){
   User.find().select('-_id').select('-__v').exec(function(err, users) {
       if (err)
           res.send(err);
+      console.log(users);
       res.json(users);
   });
 }
@@ -237,7 +252,7 @@ function getUser(req,res){
   .exec(function(err,user) {
     if (err)
       console.log(err);
-    res.json(user===null);
+    res.json(user);
   });
 }
 

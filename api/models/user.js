@@ -11,13 +11,11 @@ var UserSchema = new Schema({
   spotifyID : String,
   chordialID : String,
   friends : [String],
-  tracks : [TrackSchema]
-  //playLists:[PlayListSchema]
+  tracks : [String],
 });
 
 var PlayListSchema = new Schema({
   playListName : String,
-  playListId : String,
   tracks : [TrackSchema]
 });
 
@@ -25,13 +23,14 @@ var QueueSchema = new Schema({
   currentTrackName : String,
   isPaused : Boolean,
   seekTime : Number,
-  trackList : [TrackSchema]
+  trackList : [String]
 });
 
 var SessionSchema = new Schema({
   sessionName : String,
   sessionID : String,
   users : [UserSchema],
+  guests: [String],
   queue : QueueSchema
 });
 

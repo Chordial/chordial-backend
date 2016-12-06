@@ -41,6 +41,7 @@ function createSession(req,res) {
 
 function startSession(req,res) {
   Session.findOne({sessionID:req.swagger.params.sessionId.value} , function(err, session) {
+    session.queue = recommend(session.users);
 
   });
 }
@@ -55,12 +56,18 @@ function findSession(req,res) {
 }
 
 function joinSession(req,res) {
-  User.findOne({spotifyID:req.swagger.params.userName.value} , function(err, user) {
-    if (err)
+  Session.findOne({sessionID : req.swagger.params.sessionId.value}, function(err, session) {
+    if(err)
       console.log(err);
-      Session.findOne({sessionID : req.swagger.params.sessionId.value} , function(err, session) {
-        if (err)
+    if(req.swagger.params.guestName.value !== null){
+      session.guests.push(guestName);
+      session.save(function(err) {
+        if(err)
           console.log(err);
+      });
+    }
+    else {
+      User.findOne({spotifyID:req.swagger.params.userName.value} , function(err, user) {
         session.users.push(user);
         session.save(function(err) {
           if(err)
@@ -68,6 +75,7 @@ function joinSession(req,res) {
           console.log("user " + user.spotifyID + " added to session " + session.sessionID);
         });
       });
+    }
   });
 }
 

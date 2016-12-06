@@ -27,7 +27,7 @@ paths:
       description: Sends user authentication token to spotify and gets user information
       parameters:
       - name: accessToken
-        in: header
+        in: query
         required: false
         type: string
       responses:
@@ -48,7 +48,7 @@ paths:
       description: gets the list of friends and their Chordial information from database
       parameters:
       - name: accessToken
-        in: header
+        in: query
         required: false
         type: string
       responses:
@@ -70,7 +70,7 @@ paths:
         schema:
           type: string
       - name: accessToken
-        in: header
+        in: query
         required: false
         type: string
       responses:
@@ -92,7 +92,7 @@ paths:
       description: residentSleeper
       parameters:
       - name: accessToken
-        in: header
+        in: query
         required: false
         type: string
       responses:
@@ -106,7 +106,7 @@ paths:
       description: clears a user's list of top tracks
       parameters:
       - name: accessToken
-        in: header
+        in: query
         required: false
         type: string
       responses:
@@ -115,7 +115,7 @@ paths:
           schema:
             type: string
 
-  /me/share/{idC}:
+  /me/share:
     x-swagger-router-controller: users
 
     get:
@@ -124,11 +124,11 @@ paths:
       description: compares track arrays of each user and uses matching ids to return all common tracks
       parameters:
       - name: idC
-        in: path
+        in: query
         required: true
         type: string
       - name: accessToken
-        in: header
+        in: query
         required: false
         type: string
       responses:
@@ -148,7 +148,7 @@ paths:
       description: sends user top tracks as seeds for spotify api recommendations
       parameters:
       - name: accessToken
-        in: header
+        in: query
         required: false
         type: string
       responses:
@@ -159,7 +159,7 @@ paths:
             items:
               type: string
 
-  /user:
+  /users:
     x-swagger-router-controller: users
 
     get:
@@ -173,7 +173,7 @@ paths:
             items:
               $ref: '#/definitions/User'
 
-  /user/{userName}:
+  /user:
     x-swagger-router-controller: users
 
     get:
@@ -181,7 +181,7 @@ paths:
       description: find user with given username
       parameters:
       - name: userName
-        in: path
+        in: query
         type: string
         required: true
       responses:
@@ -270,7 +270,7 @@ paths:
       description: returns boolean true if session with given id exists, false if not
       parameters:
       - name: sessionID
-        in: header
+        in: query
         required: true
         type: string
       responses:
@@ -299,7 +299,7 @@ paths:
       description: send user information to enter a chordial session
       parameters:
       - name: userName
-        in: header
+        in: query
         type: string
         required: true
       - name: sessionId
@@ -316,7 +316,7 @@ paths:
       description: removes a session from chordial memory
       parameters:
       - name: authorizationid
-        in: header
+        in: query
         required: false
         type: string
       - name: sessionId
@@ -352,7 +352,7 @@ paths:
       description: stores data from frontend queue current state
       parameters:
       - name: getActionId
-        in: header
+        in: query
         required: true
         type: string
       - name: actionData
@@ -374,7 +374,7 @@ paths:
       description: stores data from frontend queue current state
       parameters:
       - name: storeActionId
-        in: header
+        in: query
         required: true
         type: string
       - name: sessionId
@@ -389,12 +389,13 @@ paths:
 
   /{sessionId}/queue:
     x-swagger-router-controller: songQueue
+
     post:
       operationId: addToQueue
       description: adds track to position in queue
       parameters:
       - name: trackId
-        in: header
+        in: query
         required: true
         type: string
       - name: sessionId
@@ -411,7 +412,7 @@ paths:
       description: deletes a track from the session queue
       parameters:
       - name: trackId
-        in: header
+        in: query
         required: true
         type: string
       - name: sessionId
@@ -424,6 +425,30 @@ paths:
           schema:
             type: string
 
+  /{sessionId}/user:
+    x-swagger-router-controller: users
+
+    post:
+      operationId: getQueue
+      description: adds the tracks in a queue to playlist of user
+      parameters:
+      - name: accessToken
+        in: query
+        required: false
+        type: string
+      - name: playlistName
+        in: query
+        required: true
+        type: string
+      - name: sessionId
+        in: path
+        required: true
+        type: string
+      responses:
+        201:
+          description: tracks added to user's database
+          schema:
+            type: string
 
   /createSession:
     x-swagger-router-controller: songQueue
@@ -475,7 +500,7 @@ definitions:
       tracks:
         type: array
         items:
-          $ref: '#/definitions/Track'
+          type: string
 
 
   Tracks:
