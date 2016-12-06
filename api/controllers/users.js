@@ -145,26 +145,20 @@ function deleteMusic(req,res){
   }
 
 function myMusic(req,res){
-  var id;
-  spotifyApi.getMe()
-  .then(function(data){
-    id = data.body.id;
-    User.findOne({spotifyID : id})
-    .exec(function (err, user){
-      user.tracks = [];
-      spotifyApi.getMyTopTracks({limit:50})
-      .then(function(toptracks) {
-        toptracks.body.items.forEach(function(track){
-          user.tracks.push(track.id);
-          console.log(track.id);
-        });//Populates user tracks with id of top tracks
-        user.save(function(err){
-          console.log(err);
+  myUser(spotifyApi , function(err,user){
+    user.tracks = [];
+    spotifyApi.getMyTopTracks({limit:50})
+    .then(function(toptracks) {
+      toptracks.body.items.forEach(function(track){
+        user.tracks.push(track.id);
+        console.log(track.id);
+      });//Populates user tracks with id of top tracks
+      user.save(function(err){
+        console.log(err);
+      });
+    } , function(err) {
+          console.log('Something went wrong!', err);
         });
-      } , function(err) {
-            console.log('Something went wrong!', err);
-          });
-    });
   });
   res.json("200");
 
