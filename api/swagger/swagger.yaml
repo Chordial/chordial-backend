@@ -349,7 +349,7 @@ paths:
     x-swagger-router-controller: songQueue
     get:
       operationId: queueGetData
-      description: stores data from frontend queue current state
+      description: stores data from frontend queue current state in ["pause","currentTrack","saveTime"]
       parameters:
       - name: getActionId
         in: query
@@ -395,6 +395,10 @@ paths:
       operationId: addToQueue
       description: adds track to position in queue
       parameters:
+      - name: trackPosition
+        in: query
+        required: true
+        type: number
       - name: trackId
         in: query
         required: true

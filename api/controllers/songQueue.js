@@ -29,7 +29,11 @@ function createSession(req,res) {
     sessionID : getRandomInt(10000,50000).toString(),
     sessionName : "testing",
     users : [],
-    queue : null
+    queue : new Queue({
+      isPaused: true,
+      seekTime: 0,
+      trackList: []
+    })
   }, function(err, session){
       if (err) {
         console.log(err);
@@ -123,7 +127,8 @@ function queueGetData(req,res) {
   Session.findOne({sessionID : req.swagger.params.sessionId.value} , function(err, session) {
     if(err)
       console.log(err);
-    var data = [session.queue.isPaused, session.queue.currentTrackName, session.queue.saveTime];
+    var data = [session.queue.isPaused, session.queue.currentTrackName, session.queue.seekTime];
+    res.json(data);
   });
 }
 
@@ -131,7 +136,7 @@ function addToQueue(req,res) {
   Session.findOne({sessionID : req.swagger.params.sessionId.value} , function(err, session) {
     if(err)
       console.log(err);
-    session.queue.trackList.unshift(req.swagger.params.trackId.value);
+    session.queue.trackList.splice(req.swagger.params.trackPosition.value,0,req.swagger.params.trackId.value);
     session.save(function(err){
       if(err)
         console.log(err);

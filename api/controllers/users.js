@@ -209,12 +209,9 @@ function recommend(req,res) {
         return track.id;
       });
       console.log(rectracks);
-      session.queue = new Queue({
-        isPaused: true,
-        seekTime: 0,
-        trackList: []
+      rectracks.forEach(function(track) {
+        session.queue.trackList.push(track);
       });
-      session.queue.trackList = rectracks;
       session.save(function(err) {
         if(err)
           console.log(err);
