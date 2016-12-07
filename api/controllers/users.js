@@ -3,6 +3,7 @@ var SpotifyWebApi = require('spotify-web-api-node');
 var User = (require('../models/user.js')).User;
 var Track = (require('../models/user.js')).Track;
 var Session = (require('../models/user.js')).Session;
+var Queue = (require('../models/user.js')).Queue;
 require('../helpers/helpusers.js')();
 var spotifyApi = new SpotifyWebApi({
   clientId : 'c0be0c89a1e241898635418ad5fbbbef',
@@ -19,6 +20,8 @@ module.exports = {
   myMusic: myMusic,
   deleteMusic: deleteMusic,
   shareCommon: shareCommon,
+  recommend: recommend,
+  getQueue: getQueue,
   getAll: getAll,
   getUser: getUser,
   deleteThemAll: deleteThemAll,
@@ -170,20 +173,52 @@ function myMusic(req,res){
 
 function recommend(req,res) {
   var recommended = [];
-  myUser(spotifyApi , function(err,user) {
-    var seeds = user.tracks.map(function(track) {
-      return(track.trackID);
-    });
-    spotifyApi.getRecommendations({seed_genres:["anime"]})
-    .then(function(rectracks) {
-      console.log(rectracks.body.tracks.length);
-      for (var i = 0 ; i < rectracks.body.tracks.length; i++)
-      {
-        recommended.push(rectracks.body.tracks[i].id);
+  var allSongs = [];
+  var dupeSongs = [];
+  Session.findOne({sessionID : req.swagger.params.sessionId.value} , function(err, session) {
+    if(err)
+      console.log(err);
+    for (var i = 0; i < session.users.length; i++) {
+      for (var j = 0; j < session.users[i].tracks.length; j++) {
+        if (allSongs.indexOf(session.users[i].tracks[j]) == -1)
+          allSongs.push(session.users[i].tracks[j]);
+        else if (dupeSongs.indexOf(session.users[i].tracks[j]) == -1) {
+          dupeSongs.push(session.users[i].tracks[j]);
+        }
       }
-      res.json(recommended);
-    },function(err) {
-      console.log('Something went wrong!', err);
+    }
+    if (dupeSongs.length === 0) {
+      if(session.users.length < 5) {
+        for (var k = 0; k < 5; k++) {
+          dupeSongs.push(session.users[0].tracks[k]);
+        }
+      }
+      else {
+        for(var l = 0; l < 5; l++){
+          dupeSongs.push(session.users[l].tracks[l]);
+        }
+      }
+    }
+    if (dupeSongs.length > 5)
+      dupeSongs = dupeSongs.slice(0,5);
+    var seeds = dupeSongs;
+    spotifyApi.getRecommendations({seed_tracks : seeds} , function(err, data) {
+      if(err)
+        console.log(err);
+      console.log(seeds);
+      var rectracks = data.body.tracks.map(function(track) {
+        return track.id;
+      });
+      console.log(rectracks);
+      rectracks.forEach(function(track) {
+        session.queue.trackList.push(track);
+      });
+      session.queue.currentTrack = session.queue.trackList[0];
+      session.save(function(err) {
+        if(err)
+          console.log(err);
+        res.json("200");
+      });
     });
   });
 }
@@ -225,14 +260,21 @@ function addTrack(req,res){
 
 function getQueue(req,res) {
   myUser(spotifyApi, function(err,user) {
-    Session.findOne({sessionID:req.swagger.params.sessionID.value} , function(err, session) {
+    Session.findOne({sessionID:req.swagger.params.sessionId.value} , function(err, session) {
       if(err)
         console.log(err);
       spotifyApi.createPlaylist(user.spotifyID,req.swagger.params.playlistName.value)
-      .exec(function(err,playlist) {
+      .then(function(data) {
         if(err)
           console.log(err);
-        spotifyApi.addTracksToPlaylist(user.spotifyID,playlist.id,session.queue.trackList);
+        var songUris = session.queue.trackList.map(function(track) {
+          return "spotify:track:" + track;
+        });
+        spotifyApi.addTracksToPlaylist(user.spotifyID,data.body.id,songUris);
+        res.json("200");
+      }, function(err) {
+          if(err)
+            console.log(err);
       });
     });
   });
@@ -242,7 +284,6 @@ function getAll(req,res){
   User.find().select('-_id').select('-__v').exec(function(err, users) {
       if (err)
           res.send(err);
-      console.log(users);
       res.json(users);
   });
 }

@@ -343,23 +343,18 @@ paths:
         200:
           description: send back populated queue
           schema:
-            $ref: '#/definitions/Tracks'
+            type: string
 
   /{sessionId}/queueAction:
     x-swagger-router-controller: songQueue
     get:
       operationId: queueGetData
-      description: stores data from frontend queue current state
+      description: stores data from frontend queue current state in ["pause","currentTrack","saveTime"]
       parameters:
       - name: getActionId
         in: query
-        required: true
-        type: string
-      - name: actionData
-        in: body
         required: false
-        schema:
-          type: string
+        type: string
       - name: sessionId
         in: path
         required: true
@@ -369,6 +364,7 @@ paths:
           description: server received information
           schema:
             type: string
+
     post:
       operationId: queueStoreData
       description: stores data from frontend queue current state
@@ -376,6 +372,10 @@ paths:
       - name: storeActionId
         in: query
         required: true
+        type: string
+      - name: actionData
+        in: query
+        required: false
         type: string
       - name: sessionId
         in: path
@@ -394,6 +394,10 @@ paths:
       operationId: addToQueue
       description: adds track to position in queue
       parameters:
+      - name: trackPosition
+        in: query
+        required: true
+        type: number
       - name: trackId
         in: query
         required: true
@@ -411,10 +415,10 @@ paths:
       operationId: deleteFromQueue
       description: deletes a track from the session queue
       parameters:
-      - name: trackId
+      - name: trackPosition
         in: query
         required: true
-        type: string
+        type: number
       - name: sessionId
         in: path
         required: true
@@ -461,6 +465,16 @@ paths:
           schema:
             type: string
 
+  /sessions:
+    x-swagger-router-controller: songQueue
+    get:
+      operationId: getAllSessions
+      description: returns all sessions in database
+      responses:
+        200:
+          description: sessions all found
+          schema:
+            type: string
 
   /swagger:
     x-swagger-pipe: swagger_raw
@@ -502,6 +516,19 @@ definitions:
         items:
           type: string
 
+  Queue:
+    type: object
+    properties:
+      isPaused:
+        type: boolean
+      currentTrackName:
+        type: string
+      seekTime:
+        type: string
+      tracks:
+        type: array
+        items:
+          type: string
 
   Tracks:
     type: object
