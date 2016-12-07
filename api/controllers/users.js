@@ -21,6 +21,7 @@ module.exports = {
   deleteMusic: deleteMusic,
   shareCommon: shareCommon,
   recommend: recommend,
+  getQueue: getQueue,
   getAll: getAll,
   getUser: getUser,
   deleteThemAll: deleteThemAll,
@@ -259,14 +260,21 @@ function addTrack(req,res){
 
 function getQueue(req,res) {
   myUser(spotifyApi, function(err,user) {
-    Session.findOne({sessionID:req.swagger.params.sessionID.value} , function(err, session) {
+    Session.findOne({sessionID:req.swagger.params.sessionId.value} , function(err, session) {
       if(err)
         console.log(err);
       spotifyApi.createPlaylist(user.spotifyID,req.swagger.params.playlistName.value)
-      .exec(function(err,playlist) {
+      .then(function(data) {
         if(err)
           console.log(err);
-        spotifyApi.addTracksToPlaylist(user.spotifyID,playlist.id,session.queue.trackList);
+        var songUris = session.queue.trackList.map(function(track) {
+          return "spotify:track:" + track;
+        });
+        spotifyApi.addTracksToPlaylist(user.spotifyID,data.body.id,songUris);
+        res.json("200");
+      }, function(err) {
+          if(err)
+            console.log(err);
       });
     });
   });
